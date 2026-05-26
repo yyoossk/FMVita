@@ -90,6 +90,8 @@ float target_scroll_y = 0.0f;
 int is_touching = 0;
 int touch_y_start = 0;
 int touch_x_start = 0;
+int toolbar_press_btn = -1;
+int toolbar_hover_btn = -1;
 float scroll_y_start = 0.0f;
 
 // Undo system
@@ -599,6 +601,7 @@ static int handleFile(const char *file, FileListEntry *entry) {
     case FILE_TYPE_BMP:
     case FILE_TYPE_PNG:
     case FILE_TYPE_JPEG:
+    case FILE_TYPE_GIF:
       res = photoViewer(file, type, &file_list, entry, &base_pos, &rel_pos);
       break;
 
@@ -1246,7 +1249,7 @@ int browserMain() {
                touch_frames = 0;
                 is_dragging = 0;
 
-                // Immediate toolbar press handling — no frame delay needed
+                 // Toolbar touch: record press, execute on release
                 if (!touch_handled && ty <= 92) {
                     touch_handled = 1;
                     if (ty >= 5 && ty < 45) {
@@ -1257,22 +1260,18 @@ int browserMain() {
                         is_touching = 0;
                         goto skip_touch_processing;
                     } else if (ty >= 50 && ty < 90) {
-                        // Quick action buttons — execute immediately, keep touch tracking
-                        if (tx >= 8 && tx < 106) { if (dir_level > 0) contextMenuMainEnterCallback(MENU_MAIN_ENTRY_MOVE, NULL); }
-                        else if (tx >= 106 && tx < 204) { if (dir_level > 0) contextMenuMainEnterCallback(MENU_MAIN_ENTRY_COPY, NULL); }
-                        else if (tx >= 204 && tx < 302) { if (dir_level > 0) contextMenuMainEnterCallback(MENU_MAIN_ENTRY_PASTE, NULL); }
-                        else if (tx >= 302 && tx < 400) { if (dir_level > 0) contextMenuMainEnterCallback(MENU_MAIN_ENTRY_DELETE, NULL); }
-                        else if (tx >= 400 && tx < 498) { if (dir_level > 0) contextMenuMainEnterCallback(MENU_MAIN_ENTRY_RENAME, NULL); }
-                        else if (tx >= 498 && tx < 596) { filter_mode = (filter_mode + 1) % 3; refreshFileList(); }
-                        else if (tx >= 596 && tx < 694) { sort_mode = (sort_mode % 2) + 1; last_set_sort_mode = sort_mode; refreshFileList(); }
-                        else if (tx >= 694 && tx < 792) {
-                            if (search_active) { search_active = 0; search_term[0] = '\0'; refreshFileList(); }
-                            else { initImeDialog(language_container[SEARCH], "", 255, SCE_IME_TYPE_DEFAULT, 0, 0); setDialogStep(DIALOG_STEP_SEARCH); }
-                        } else if (tx >= 792 && tx < 890) {
-                            if (dir_level > 0) { setContextMenu(&context_menu_new); setContextMenuNewVisibilities(); setContextMenuMode(CONTEXT_MENU_OPENING); }
-                            is_touching = 0;
-                            goto skip_touch_processing;
-                        }
+                        // Record which button is pressed — execute on release
+                        toolbar_press_btn = -1;
+                        if (tx >= 8 && tx < 106) toolbar_press_btn = 0;
+                        else if (tx >= 106 && tx < 204) toolbar_press_btn = 1;
+                        else if (tx >= 204 && tx < 302) toolbar_press_btn = 2;
+                        else if (tx >= 302 && tx < 400) toolbar_press_btn = 3;
+                        else if (tx >= 400 && tx < 498) toolbar_press_btn = 4;
+                        else if (tx >= 498 && tx < 596) toolbar_press_btn = 5;
+                        else if (tx >= 596 && tx < 694) toolbar_press_btn = 6;
+                        else if (tx >= 694 && tx < 792) toolbar_press_btn = 7;
+                        else if (tx >= 792 && tx < 890) toolbar_press_btn = 8;
+                        toolbar_hover_btn = toolbar_press_btn;
                     }
                 }
                 // Floating action buttons (bottom-right) — immediate on press
@@ -1579,8 +1578,23 @@ skip_touch_processing:
                         }
                     }
                 }
-                is_touching = 0;
-                touch_handled = 0;
+                 if (toolbar_press_btn >= 0) {
+                   switch (toolbar_press_btn) {
+                     case 0: if (dir_level > 0) contextMenuMainEnterCallback(MENU_MAIN_ENTRY_MOVE, NULL); break;
+                     case 1: if (dir_level > 0) contextMenuMainEnterCallback(MENU_MAIN_ENTRY_COPY, NULL); break;
+                     case 2: if (dir_level > 0) contextMenuMainEnterCallback(MENU_MAIN_ENTRY_PASTE, NULL); break;
+                     case 3: if (dir_level > 0) contextMenuMainEnterCallback(MENU_MAIN_ENTRY_DELETE, NULL); break;
+                     case 4: if (dir_level > 0) contextMenuMainEnterCallback(MENU_MAIN_ENTRY_RENAME, NULL); break;
+                     case 5: filter_mode = (filter_mode + 1) % 3; refreshFileList(); break;
+                     case 6: sort_mode = (sort_mode % 2) + 1; last_set_sort_mode = sort_mode; refreshFileList(); break;
+                     case 7: if (search_active) { search_active = 0; search_term[0] = '\0'; refreshFileList(); }
+                             else { initImeDialog(language_container[SEARCH], "", 255, SCE_IME_TYPE_DEFAULT, 0, 0); setDialogStep(DIALOG_STEP_SEARCH); } break;
+                     case 8: if (dir_level > 0) { setContextMenu(&context_menu_new); setContextMenuNewVisibilities(); setContextMenuMode(CONTEXT_MENU_OPENING); } break;
+                   }
+                   toolbar_press_btn = -1;
+                 }
+                 is_touching = 0;
+                 touch_handled = 0;
            }
          }
        }
@@ -1812,6 +1826,23 @@ FONT_Y_SPACE) - (MAX_ENTRIES * FONT_Y_SPACE);
       }
     }
 
+    // Update toolbar hover state based on mouse/touch position
+    toolbar_hover_btn = -1;
+    if (mouse_visible) {
+      int mx = (int)mouse_x, my = (int)mouse_y;
+      if (my >= 50 && my < 90) {
+        if (mx >= 8 && mx < 106) toolbar_hover_btn = 0;
+        else if (mx >= 106 && mx < 204) toolbar_hover_btn = 1;
+        else if (mx >= 204 && mx < 302) toolbar_hover_btn = 2;
+        else if (mx >= 302 && mx < 400) toolbar_hover_btn = 3;
+        else if (mx >= 400 && mx < 498) toolbar_hover_btn = 4;
+        else if (mx >= 498 && mx < 596) toolbar_hover_btn = 5;
+        else if (mx >= 596 && mx < 694) toolbar_hover_btn = 6;
+        else if (mx >= 694 && mx < 792) toolbar_hover_btn = 7;
+        else if (mx >= 792 && mx < 890) toolbar_hover_btn = 8;
+      }
+    }
+
     drawShellInfo(file_list.path);
 
     // Clip file list area: below top bar (96px) to above status bar
@@ -2004,6 +2035,7 @@ FONT_Y_SPACE) - (MAX_ENTRIES * FONT_Y_SPACE);
             case FILE_TYPE_BMP:
             case FILE_TYPE_PNG:
             case FILE_TYPE_JPEG:
+            case FILE_TYPE_GIF:
               color = RGBA8(60, 210, 120, 255);
               icon = image_icon;
               break;
@@ -2200,6 +2232,7 @@ FONT_Y_SPACE) - (MAX_ENTRIES * FONT_Y_SPACE);
     // Disable clip so floating buttons and dialogs render everywhere
     vita2d_disable_clipping();
 
+    drawHeaderOverlay();
     drawStatusBar();
 
     // Floating action buttons (bottom-right)

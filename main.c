@@ -195,8 +195,8 @@ void setDialogStep(int step) {
 }
 
 void drawStatusBar() {
-  unsigned int sb_bg = COLOR_ALPHA(themeCardBg(vitashell_config.theme_preset), 200);
-  unsigned int sb_col = themeTextDim(vitashell_config.theme_preset);
+  unsigned int sb_bg = COLOR_ALPHA(themeCardBg(vitashell_config.theme_preset), 230);
+  unsigned int sb_col = COLOR_ALPHA(themeTextColor(vitashell_config.theme_preset), 220);
   unsigned int sb_acc = themeAccentColor(vitashell_config.theme_preset);
 
   int y = SCREEN_HEIGHT - STATUSBAR_H;
@@ -317,10 +317,16 @@ void drawShellInfo(const char *path) {
       int bx = 10 + bi * (bw + gap);
       int disabled = (is_root && bi < 5);
 
+      int active = (bi == toolbar_press_btn || bi == toolbar_hover_btn);
       if (!disabled) {
-        vita2d_draw_rectangle(bx, aby, bw, abh, COLOR_ALPHA(themeCardBg(vitashell_config.theme_preset), 160));
-        vita2d_draw_rectangle(bx, aby, bw, 2, ab_colors[bi]);
-        vita2d_draw_rectangle(bx, aby+abh-1, bw, 1, COLOR_ALPHA(t_txt, 8));
+        if (active) {
+          vita2d_draw_rectangle(bx, aby, bw, abh, COLOR_ALPHA(ab_colors[bi], 200));
+          vita2d_draw_rectangle(bx, aby, bw, 2, RGBA8(255,255,255,60));
+        } else {
+          vita2d_draw_rectangle(bx, aby, bw, abh, COLOR_ALPHA(themeCardBg(vitashell_config.theme_preset), 160));
+          vita2d_draw_rectangle(bx, aby, bw, 2, ab_colors[bi]);
+          vita2d_draw_rectangle(bx, aby+abh-1, bw, 1, COLOR_ALPHA(t_txt, 8));
+        }
       } else {
         vita2d_draw_rectangle(bx, aby, bw, abh, COLOR_ALPHA(themeTextDim(vitashell_config.theme_preset), 30));
         vita2d_draw_rectangle(bx, aby, bw, 1, COLOR_ALPHA(t_txt, 5));
@@ -343,21 +349,24 @@ void drawShellInfo(const char *path) {
     }
   }
 
-  // ---- Row 3: Header row ----
-  {
-    int hy = 74;
-    vita2d_draw_rectangle(0, hy, SCREEN_WIDTH, HEADER_H, t_card);
-    vita2d_draw_rectangle(0, hy+HEADER_H-1, SCREEN_WIDTH, 1, COLOR_ALPHA(t_txt, 10));
+}
 
-    unsigned int hc = COLOR_ALPHA(themeTextDim(vitashell_config.theme_preset), 200);
-    float ty = hy + 6;
+void drawHeaderOverlay() {
+  unsigned int t_txt = themeTopbarText(vitashell_config.theme_preset);
+  unsigned int t_card = COLOR_ALPHA(themeCardBg(vitashell_config.theme_preset), 180);
 
-    if (vitashell_config.view_mode != 1) {
-      pgf_draw_text(FILE_X, ty, hc, "Nome");
-      if (vitashell_config.view_mode == 0) {
-        pgf_draw_text(ALIGN_RIGHT(INFORMATION_X, pgf_text_width("Tamanho")), ty, hc, "Tamanho");
-        pgf_draw_text(ALIGN_RIGHT(SCREEN_WIDTH-SHELL_MARGIN_X, pgf_text_width("Data")), ty, hc, "Data");
-      }
+  int hy = 74;
+  vita2d_draw_rectangle(0, hy, SCREEN_WIDTH, HEADER_H, t_card);
+  vita2d_draw_rectangle(0, hy+HEADER_H-1, SCREEN_WIDTH, 1, COLOR_ALPHA(t_txt, 10));
+
+  unsigned int hc = COLOR_ALPHA(themeTextColor(vitashell_config.theme_preset), 220);
+  float ty = hy + 6;
+
+  if (vitashell_config.view_mode != 1) {
+    pgf_draw_text(FILE_X, ty, hc, "Nome");
+    if (vitashell_config.view_mode == 0) {
+      pgf_draw_text(ALIGN_RIGHT(INFORMATION_X, pgf_text_width("Tamanho")), ty, hc, "Tamanho");
+      pgf_draw_text(ALIGN_RIGHT(SCREEN_WIDTH-SHELL_MARGIN_X, pgf_text_width("Data")), ty, hc, "Data");
     }
   }
 }

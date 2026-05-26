@@ -359,7 +359,7 @@ int photoViewer(const char *file, int type, FileList *list, FileListEntry *entry
           char path[MAX_PATH_LENGTH];
           snprintf(path, MAX_PATH_LENGTH, "%s%s", list->path, entry->name);
           int type = getFileType(path);
-          if (type == FILE_TYPE_BMP || type == FILE_TYPE_JPEG || type == FILE_TYPE_PNG) {
+          if (type == FILE_TYPE_BMP || type == FILE_TYPE_JPEG || type == FILE_TYPE_PNG || type == FILE_TYPE_GIF) {
             vita2d_wait_rendering_done();
             vita2d_free_texture(tex);
             

@@ -432,6 +432,7 @@ static int mediaPathHandler(const char *path) {
     case FILE_TYPE_BMP:
     case FILE_TYPE_JPEG:
     case FILE_TYPE_PNG:
+    case FILE_TYPE_GIF:
     case FILE_TYPE_MP3:
     case FILE_TYPE_MP4:
       return 0;
@@ -477,7 +478,7 @@ static int exportMedia(char *path, uint32_t *songs, uint32_t *videos, uint32_t *
     return res;
 
   int type = getFileType(path);
-  if (type == FILE_TYPE_BMP || type == FILE_TYPE_JPEG || type == FILE_TYPE_PNG) {
+  if (type == FILE_TYPE_BMP || type == FILE_TYPE_JPEG || type == FILE_TYPE_PNG || type == FILE_TYPE_GIF) {
     PhotoExportParam param;
     memset(&param, 0, sizeof(PhotoExportParam));
     param.version = 0x03150021;

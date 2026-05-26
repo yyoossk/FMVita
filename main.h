@@ -103,8 +103,8 @@ void drawShellInfo(const char *path);
 // Main
 #define SHELL_MARGIN_X 20.0f
 #define SHELL_MARGIN_Y 18.0f
-#define HEADER_H 22.0f
-#define STATUSBAR_H 28.0f
+#define HEADER_H 26.0f
+#define STATUSBAR_H 34.0f
 
 #define PATH_Y (SHELL_MARGIN_Y + 1.0f * FONT_Y_SPACE)
 
@@ -282,20 +282,21 @@ int dialogSteps();
 void initFtp();
 void initUsb();
 
+extern int toolbar_press_btn;
+extern int toolbar_hover_btn;
 void drawStatusBar();
 void drawScrollBar(int pos, int n);
 void drawShellInfo(const char *path);
 
 void ftpvita_PROM(ftpvita_client_info_t *client);
 
-// Context menu callbacks (for toolbar actions)
 int contextMenuMainEnterCallback(int sel, void *context);
 int contextMenuHomeEnterCallback(int sel, void *context);
 int contextMenuSortEnterCallback(int sel, void *context);
 
-// Custom delete confirmation dialog
 extern char delete_confirm_message[512];
 extern int delete_confirm_is_folder;
+void drawHeaderOverlay();
 void drawDeleteConfirmDialog();
 
 // Generic touch confirm dialog (replaces YESNO system dialogs)

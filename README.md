@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="https://github.com/WolffsRoom/FMVita/raw/master/media/icon0.png" width="128" alt="Logo FMVita">
+  <img src="https://github.com/WolffsRoom/FMVita/blob/master/media/Media/%C3%8Dcones%20-%20Branco.svg" width="128" alt="Logo FMVita">
   <h1>FMVita</h1>
   <h3>File Manager Vita</h3>
   <p align="center">
@@ -15,7 +15,7 @@
 **FMVita** is an enhanced fork of **VitaShell** (originally created by *TheFloW*). This version focuses on **usability**, expanding touchscreen support for the PS Vita, introducing animated backgrounds, various Quality of Life (QoL) improvements, and a new program file organization under the independent directory `ux0:FMVita/`.
 
 <div align="center">
-  <img src="https://github.com/WolffsRoom/FMVita/raw/master/media/Tela%20Inicial.png" alt="Home Screen" width="80%">
+  <img src="https://github.com/WolffsRoom/FMVita/blob/master/media/Media/FMVita_Image/2026-05-23-003448-063842.png" alt="Home Screen" width="80%">
 </div>
 
 ---
@@ -34,7 +34,7 @@ FMVita was designed to prevent conflicts with your current configuration. Theref
 ### Interface and Themes
 
 <div align="center">
-  <img src="https://github.com/WolffsRoom/FMVita/raw/master/media/Modo%20Grid.png" alt="Grid Mode" width="80%">
+  <img src="https://github.com/WolffsRoom/FMVita/blob/master/media/Media/FMVita_Image/2026-05-23-003456-739293.png" alt="Grid Mode" width="80%">
 </div>
 
 * **Six Color Presets:** *Dark, Light, Blue, Red, Purple*, and *Brown*. The system automatically calculates text, highlight, selection, dialog, and border colors.
@@ -66,7 +66,7 @@ FMVita was designed to prevent conflicts with your current configuration. Theref
 
 <div align="center">
   <img src="https://github.com/WolffsRoom/FMVita/raw/master/media/Modo%20Coluna.png" alt="Column Mode 1" width="49%">
-  <img src="https://github.com/WolffsRoom/FMVita/raw/master/media/Modo%20Coluna2.png" alt="Column Mode 2" width="49%">
+  <img src="https://github.com/WolffsRoom/FMVita/blob/master/media/Media/FMVita_Image/2026-05-23-003541-050146.png" alt="Column Mode 2" width="49%">
 </div>
 
 * **Column View:** An innovative 3-column layout (*Grandparent / Parent / Current*) for ultra-fast directory browsing. Highlights the active folder in gold within the upper columns and allows direct touch navigation on any column.

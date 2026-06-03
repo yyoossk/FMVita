@@ -17,6 +17,7 @@
 */
 
 #include "main.h"
+#include <string.h>
 #include "main_context.h"
 #include "browser.h"
 #include "init.h"
@@ -58,6 +59,23 @@
 #include "pfs.h"
 
 INCLUDE_EXTERN_RESOURCE(default_mouse_png);
+
+// Forward declarations for folder transition
+void captureFolderTransition(int dir);
+void drawFolderTransition();
+
+#define MAX_TRANSITION_ENTRIES 60
+
+static char transition_names[MAX_TRANSITION_ENTRIES][MAX_NAME_LENGTH];
+static int transition_types[MAX_TRANSITION_ENTRIES];
+static int transition_indices[MAX_TRANSITION_ENTRIES];
+static int transition_is_folder[MAX_TRANSITION_ENTRIES];
+static SceOff transition_sizes[MAX_TRANSITION_ENTRIES];
+static int transition_count = 0;
+static int transition_active = 0;
+static int transition_dir = 0;
+static float transition_progress = 0.0f;
+static int transition_ready = 1;
 
 // File lists
 FileList file_list, mark_list, copy_list, install_list, parent_list, child_list, grandparent_list;
@@ -282,6 +300,10 @@ static void dirUp() {
     pfsUmount();
   }
 
+  if (transition_ready && vitashell_config.transition_mode != TRANSITION_MODE_OFF) {
+    captureFolderTransition(1);
+  }
+
   // skip all symlink hierarchies when pressing O in bookmarks/ recent files
   if (symlink_directory_path_head &&
       ((strncmp(file_list.path, VITASHELL_BOOKMARKS_PATH, MAX_PATH_LENGTH) == 0)
@@ -371,6 +393,10 @@ int refreshFileList() {
     sort_mode = SORT_BY_DATE;
   } else {
     sort_mode = last_set_sort_mode;
+  }
+
+  if (transition_ready && vitashell_config.transition_mode != TRANSITION_MODE_OFF) {
+    captureFolderTransition(0);
   }
 
   do {
@@ -963,6 +989,10 @@ static void fileBrowserHandleFile(FileListEntry *file_entry) {
 }
 
 static void fileBrowserHandleFolder(FileListEntry *file_entry) {
+  if (transition_ready && vitashell_config.transition_mode != TRANSITION_MODE_OFF) {
+    captureFolderTransition(0);
+  }
+
   if (strcmp(file_entry->name, DIR_UP) == 0) {
     dirUp();
   } else {
@@ -1057,6 +1087,137 @@ static void fileBrowserHandleSymlink(FileListEntry *file_entry) {
   int res = refreshFileList();
   if (res < 0)
     errorDialog(res);
+}
+
+void captureFolderTransition(int dir) {
+  if (!transition_ready) return;
+
+  transition_count = 0;
+  transition_dir = dir;
+
+  int max_visible = GET_MAX_POSITION();
+  int end = base_pos + max_visible;
+  if (end > file_list.length) end = file_list.length;
+
+  int i;
+  for (i = base_pos; i < end && transition_count < MAX_TRANSITION_ENTRIES; i++) {
+    FileListEntry *entry = fileListGetNthEntry(&file_list, i);
+    if (entry) {
+      strcpy(transition_names[transition_count], entry->name);
+      transition_types[transition_count] = entry->type;
+      transition_is_folder[transition_count] = entry->is_folder;
+      transition_indices[transition_count] = i;
+      transition_sizes[transition_count] = entry->size;
+      transition_count++;
+    }
+  }
+
+  transition_progress = 0.0f;
+  transition_active = 1;
+  transition_ready = 0;
+}
+
+void drawFolderTransition() {
+  if (!transition_active) return;
+
+  int mode = vitashell_config.transition_mode;
+  float step = 0.0f;
+  int alpha_effect = 0;
+
+  switch (mode) {
+    case TRANSITION_MODE_SLIDE:
+      step = 0.12f;
+      break;
+    case TRANSITION_MODE_SMOOTH_SLIDE:
+      step = 0.06f;
+      alpha_effect = 1;
+      break;
+    case TRANSITION_MODE_FADE:
+      step = 0.12f;
+      break;
+    default:
+      transition_active = 0;
+      transition_ready = 1;
+      return;
+  }
+
+  if (transition_dir == 0) {
+    transition_progress += step;
+    if (transition_progress >= 1.0f) {
+      transition_progress = 1.0f;
+      transition_active = 0;
+      transition_ready = 1;
+      return;
+    }
+  } else {
+    transition_progress -= step;
+    if (transition_progress <= 0.0f) {
+      transition_progress = 0.0f;
+      transition_active = 0;
+      transition_ready = 1;
+      return;
+    }
+  }
+
+  float offset;
+  unsigned int alpha = 255;
+
+  if (mode == TRANSITION_MODE_FADE) {
+    if (transition_dir == 0) {
+      alpha = (unsigned int)((1.0f - transition_progress) * 255.0f);
+    } else {
+      alpha = (unsigned int)(transition_progress * 255.0f);
+    }
+
+    vita2d_draw_rectangle(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, COLOR_ALPHA(themeBgColor(vitashell_config.theme_preset), alpha));
+    return;
+  }
+
+  if (transition_dir == 0) {
+    offset = -(1.0f - transition_progress) * SCREEN_WIDTH;
+    if (alpha_effect) alpha = (unsigned int)(transition_progress * 255.0f);
+    else alpha = 255;
+  } else {
+    offset = transition_progress * SCREEN_WIDTH;
+    if (alpha_effect) alpha = (unsigned int)((1.0f - transition_progress) * 255.0f);
+    else alpha = 255;
+  }
+
+  unsigned int text_color = COLOR_ALPHA(themeTextColor(vitashell_config.theme_preset), alpha);
+  unsigned int dim_color = COLOR_ALPHA(themeTextDim(vitashell_config.theme_preset), alpha);
+  unsigned int folder_color = COLOR_ALPHA(themeFolderColor(vitashell_config.theme_preset), alpha);
+  unsigned int list_bg = COLOR_ALPHA(themeListBg(vitashell_config.theme_preset), alpha);
+  unsigned int sel_bg = COLOR_ALPHA(themeSelectionBg(vitashell_config.theme_preset), alpha);
+  unsigned int sel_line = COLOR_ALPHA(themeSelectionLine(vitashell_config.theme_preset), alpha);
+
+  int draw_count = transition_count;
+  int limit = GET_MAX_POSITION();
+  if (draw_count > limit) draw_count = limit;
+
+  int i;
+  for (i = 0; i < draw_count; i++) {
+    float y = START_Y + i * FONT_Y_SPACE + offset;
+    if (y + FONT_Y_SPACE < START_Y || y > SCREEN_HEIGHT) continue;
+
+    vita2d_draw_rectangle(SHELL_MARGIN_X, y, MAX_WIDTH, FONT_Y_SPACE, list_bg);
+
+    if (transition_indices[i] == base_pos + rel_pos) {
+      vita2d_draw_rectangle(SHELL_MARGIN_X, y, MAX_WIDTH, FONT_Y_SPACE, sel_bg);
+      vita2d_draw_rectangle(SHELL_MARGIN_X, y, 4, FONT_Y_SPACE, sel_line);
+    }
+
+    if (transition_is_folder[i]) {
+      pgf_draw_text(FILE_X, y, folder_color, transition_names[i]);
+    } else {
+      pgf_draw_text(FILE_X, y, text_color, transition_names[i]);
+    }
+
+    if (!transition_is_folder[i]) {
+      char size_str[64];
+      getSizeString(size_str, transition_sizes[i]);
+      pgf_draw_text(INFORMATION_X, y, dim_color, size_str);
+    }
+  }
 }
 
 int browserMain() {
@@ -2412,6 +2573,8 @@ COLOR_ALPHA(themeListBg(vitashell_config.theme_preset), 100) : themeListBg(vitas
       float ms = 1.3f;
       vita2d_draw_texture_scale(mouse_tex, mouse_x, mouse_y, ms, ms);
     }
+
+    drawFolderTransition();
 
     // End drawing
     endDrawing();

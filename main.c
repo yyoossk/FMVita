@@ -1205,7 +1205,7 @@ int dialogSteps() {
         if (install_list.length > 0) {
           FileListEntry *entry = install_list.head;
           snprintf(install_path, MAX_PATH_LENGTH, "%s%s", install_list.path, entry->name);
-          args.file = install_path;
+          strcpy(args.file, install_path);
 
           // Focus
           setFocusOnFilename(entry->name);
@@ -1213,7 +1213,7 @@ int dialogSteps() {
           // Remove entry
           fileListRemoveEntry(&install_list, entry);
         } else {
-          args.file = cur_file;
+          strcpy(args.file, cur_file);
         }
 
         setDialogStep(DIALOG_STEP_INSTALLING);
@@ -1230,7 +1230,7 @@ int dialogSteps() {
     {
       if (msg_result == MESSAGE_DIALOG_RESULT_RUNNING) {
         InstallArguments args;
-        args.file = getLastDownloadQR();
+        strcpy(args.file, getLastDownloadQR());
 
         setDialogStep(DIALOG_STEP_INSTALLING);
 

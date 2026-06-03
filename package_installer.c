@@ -37,6 +37,7 @@ static int loadScePaf() {
   int result = -1;
   SceSysmoduleOpt opt;
   memset(&opt, 0, sizeof(opt));
+  opt.flags = 1;
   opt.result = &result;
 
   return sceSysmoduleLoadModuleInternalWithArg(SCE_SYSMODULE_INTERNAL_PAF, sizeof(argp), argp, &opt);
@@ -44,7 +45,10 @@ static int loadScePaf() {
 
 static int unloadScePaf() {
   SceSysmoduleOpt opt;
+  int result = -1;
   memset(&opt, 0, sizeof(opt));
+  opt.flags = 1;
+  opt.result = &result;
   return sceSysmoduleUnloadModuleInternalWithArg(SCE_SYSMODULE_INTERNAL_PAF, 0, NULL, &opt);
 }
 

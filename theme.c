@@ -411,15 +411,21 @@ void loadGifBackground() {
 
   FILE *f = NULL;
   
-  // 1. Try FMVita/Gif (primary user choice directory)
-  snprintf(path, MAX_PATH_LENGTH, "ux0:FMVita/Gif/theme.gif");
+  // 1. Try VPK-bundled GIF first
+  snprintf(path, MAX_PATH_LENGTH, "app0:Theme/GIF/theme.gif");
   f = fopen(path, "rb");
+
+  // 2. Try FMVita/Gif (primary user choice directory)
   if (!f) {
+    snprintf(path, MAX_PATH_LENGTH, "ux0:FMVita/Gif/theme.gif");
+    f = fopen(path, "rb");
+    if (!f) {
       snprintf(path, MAX_PATH_LENGTH, "ux0:FMVita/GIF/theme.gif");
       f = fopen(path, "rb");
+    }
   }
 
-  // 2. Try theme folder fallbacks if still not found
+  // 3. Try theme folder fallbacks if still not found
   if (!f) {
     snprintf(path, MAX_PATH_LENGTH, "ux0:FMVita/theme/%s/GIF/theme.gif", active_theme);
     f = fopen(path, "rb");
@@ -431,12 +437,6 @@ void loadGifBackground() {
         f = fopen(path, "rb");
       }
     }
-  }
-
-  // 3. Fallback to app package directories
-  if (!f) {
-    snprintf(path, MAX_PATH_LENGTH, "app0:Theme/GIF/theme.gif");
-    f = fopen(path, "rb");
   }
 
   if (!f) return;
@@ -488,7 +488,9 @@ void loadPngBackground() {
   }
   if (vitashell_config.background_anim != 8) return;
 
-  png_bg_texture = vita2d_load_PNG_file("ux0:FMVita/Background/bg.png");
+  png_bg_texture = vita2d_load_PNG_file("app0:Theme/GIF/theme.png");
+  if (!png_bg_texture)
+    png_bg_texture = vita2d_load_PNG_file("ux0:FMVita/Background/bg.png");
   if (!png_bg_texture)
     png_bg_texture = vita2d_load_PNG_file("app0:Background/bg.png");
   if (png_bg_texture) {
@@ -513,7 +515,10 @@ void updateGifBackground() {
 
   uint64_t delay_us = (uint64_t)delay_ms * 1000;
   if (now - gif_frame_time >= delay_us) {
-    gif_current_frame = (gif_current_frame + 1) % gif_frames;
+    if (gif_frames > 0)
+      gif_current_frame = (gif_current_frame + 1) % gif_frames;
+    else
+      gif_current_frame = 0;
     gif_frame_time = now;
 
     if (gif_texture && gif_data) {

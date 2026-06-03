@@ -337,14 +337,27 @@ void loadLanguage(int id) {
    LANGUAGE_ENTRY(PROTECTED_PATH),
 
    LANGUAGE_ENTRY(RUN_APP_AFTER_INSTALL),
-   LANGUAGE_ENTRY(LAUNCH_APP_GAME)
+   LANGUAGE_ENTRY(LAUNCH_APP_GAME),
+
+   LANGUAGE_ENTRY(VITASHELL_SETTINGS_TRANSITION_MODE),
+   LANGUAGE_ENTRY(TRANSITION_LATERAL),
+   LANGUAGE_ENTRY(TRANSITION_SOFT),
+   LANGUAGE_ENTRY(TRANSITION_FADE),
+   LANGUAGE_ENTRY(TRANSITION_OFF)
    };
 
   // Load default config file
   readConfigBuffer(&_binary_resources_english_us_txt_start, (int)&_binary_resources_english_us_txt_size,
                    language_entries, sizeof(language_entries) / sizeof(ConfigEntry));
 
-  // Load custom config file
+  // Load bundled language file from app0:
+  if (id >= 0 && id < (sizeof(lang) / sizeof(char *))) {
+    char path[MAX_PATH_LENGTH];
+    snprintf(path, MAX_PATH_LENGTH, "app0:l10n/%s.txt", lang[id]);
+    readConfig(path, language_entries, sizeof(language_entries) / sizeof(ConfigEntry));
+  }
+
+  // Load custom config file from ux0:
   if (use_custom_config) {
     if (id >= 0 && id < (sizeof(lang) / sizeof(char *))) {
       char path[MAX_PATH_LENGTH];

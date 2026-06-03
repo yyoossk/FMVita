@@ -25,7 +25,7 @@
 #define HEAD_BIN PACKAGE_DIR "/sce_sys/package/head.bin"
 
 typedef struct {
-  char *file;
+  char file[MAX_PATH_LENGTH];
 } InstallArguments;
 
 int promoteApp(const char *path);

@@ -33,6 +33,7 @@ static void suspendDevice();
 
 static int changed = 0;
 static int theme = 0;
+int language_changed = 0;
 
 static char spoofed_version[6];
 
@@ -42,6 +43,7 @@ static int n_settings_entries = 0;
 static char *usbdevice_options[4];
 static char *select_button_options[3];
 static char *bg_anim_options[9];
+static char *transition_mode_options[4];
 static char *view_mode_options[3];
 static char *theme_preset_options[7];
 
@@ -66,6 +68,7 @@ static ConfigEntry settings_entries[] = {
   { "SELECT_BUTTON",      CONFIG_TYPE_DECIMAL, (int *)&vitashell_config.select_button },
   { "VIEW_MODE",          CONFIG_TYPE_DECIMAL, (int *)&vitashell_config.view_mode },
   { "BACKGROUND_ANIM",    CONFIG_TYPE_DECIMAL, (int *)&vitashell_config.background_anim },
+  { "TRANSITION_MODE",    CONFIG_TYPE_DECIMAL, (int *)&vitashell_config.transition_mode },
   { "THEME_PRESET",       CONFIG_TYPE_DECIMAL, (int *)&vitashell_config.theme_preset },
   { "LANGUAGE",           CONFIG_TYPE_DECIMAL, (int *)&language },
 };
@@ -93,6 +96,8 @@ SettingsMenuOption main_settings[] = {
     usbdevice_options, sizeof(usbdevice_options) / sizeof(char **), &vitashell_config.usbdevice },
   { VITASHELL_SETTINGS_SELECT_BUTTON,   SETTINGS_OPTION_TYPE_OPTIONS, NULL, NULL, 0,
     select_button_options, sizeof(select_button_options) / sizeof(char **), &vitashell_config.select_button },
+  { VITASHELL_SETTINGS_TRANSITION_MODE, SETTINGS_OPTION_TYPE_OPTIONS, NULL, NULL, 0,
+    transition_mode_options, 4, &vitashell_config.transition_mode },
   { VITASHELL_SETTINGS_THEME,           SETTINGS_OPTION_TYPE_OPTIONS, NULL, NULL, 0,
     NULL, 0, NULL },
 
@@ -206,6 +211,11 @@ static void refreshSettingsLangStrings() {
   bg_anim_options[7] = language_container[BG_ANIM_GIF];
   bg_anim_options[8] = language_container[BG_ANIM_PNG];
 
+  transition_mode_options[0] = language_container[TRANSITION_OFF];
+  transition_mode_options[1] = language_container[TRANSITION_LATERAL];
+  transition_mode_options[2] = language_container[TRANSITION_SOFT];
+  transition_mode_options[3] = language_container[TRANSITION_FADE];
+
   view_mode_options[0] = language_container[VIEW_MODE_LIST];
   view_mode_options[1] = language_container[VIEW_MODE_GRID];
   view_mode_options[2] = language_container[VIEW_MODE_COLUMN];
@@ -275,6 +285,7 @@ void openSettingsMenu() {
   }
 
   changed = 0;
+  language_changed = 0;
   settings_scroll = 0.0f;
   settings_scroll_target = 0.0f;
 }
@@ -564,6 +575,7 @@ void settingsMenuCtrl() {
     if (option->name == VITASHELL_SETTINGS_LANGUAGE) {
       loadLanguage(language);
       refreshSettingsLangStrings();
+      language_changed = 1;
     }
   }
 
@@ -612,6 +624,11 @@ void settingsMenuCtrl() {
 
   // Close
   if (pressed_pad[PAD_START] || pressed_pad[PAD_CANCEL]) {
+    if (language_changed) {
+      closeSettingsMenu();
+      setTouchConfirm(language_container[CONFIRM_REBOOT], rebootDevice, NULL);
+      return;
+    }
     closeSettingsMenu();
   }
 }

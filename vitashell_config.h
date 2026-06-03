@@ -32,6 +32,13 @@ enum SelectButtonModes {
   SELECT_BUTTON_MODE_QR,
 };
 
+enum TransitionModes {
+  TRANSITION_MODE_OFF,
+  TRANSITION_MODE_SLIDE,
+  TRANSITION_MODE_SMOOTH_SLIDE,
+  TRANSITION_MODE_FADE,
+};
+
 typedef struct {
   int usbdevice;
   int select_button;
@@ -41,6 +48,7 @@ typedef struct {
   int view_mode;
   int background_anim;
   int theme_preset;
+  int transition_mode;
 } VitaShellConfig;
 
 #endif

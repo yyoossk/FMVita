@@ -228,7 +228,9 @@ vita_create_vpk(FileManager.vpk ${VITA_TITLEID} eboot.bin
        pkg/sce_sys/livearea/contents/bg0.png sce_sys/livearea/contents/bg0.png
        pkg/sce_sys/livearea/contents/default_gate.png sce_sys/livearea/contents/default_gate.png
        pkg/sce_sys/livearea/contents/template.xml sce_sys/livearea/contents/template.xml
-        Theme/GIF/theme.gif Theme/GIF/theme.gif
+       l10n/ l10n/
+       Theme/GIF/theme.gif Theme/GIF/theme.gif
+       Theme/GIF/theme.png Theme/GIF/theme.png
 )
 
 # for network update

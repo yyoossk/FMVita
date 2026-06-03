@@ -229,6 +229,11 @@ THEME_RED                           = "Red"
 THEME_PURPLE                        = "Purple"
 THEME_BROWN                         = "Brown"
 THEME_GRAY                          = "Gray"
+VITASHELL_SETTINGS_TRANSITION_MODE   = "Transition mode"
+TRANSITION_LATERAL                  = "Slide"
+TRANSITION_SOFT                     = "Smooth slide"
+TRANSITION_FADE                     = "Fade"
+TRANSITION_OFF                      = "Off"
 
 # USB strings
 USB_CONNECTED                        = "USB connected"

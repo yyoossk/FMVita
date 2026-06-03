@@ -635,7 +635,7 @@ int extractArchiveFile(const char *src_path, const char *dst_path, FileProcessPa
 
   SceUID fddst = sceIoOpen(dst_path, SCE_O_WRONLY | SCE_O_CREAT | SCE_O_TRUNC, 0777);
   if (fddst < 0) {
-    psarcFileClose(fdsrc);
+    archiveFileClose(fdsrc);
     return fddst;
   }
 

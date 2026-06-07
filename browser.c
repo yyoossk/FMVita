@@ -824,7 +824,7 @@ static int fileBrowserMenuCtrl() {
     }
 
     // Infinite scroll: wrap to last item when at top (single press only)
-    if (old_pos == base_pos + rel_pos && file_list.length > 0 && accel == 1) {
+    if (vitashell_config.scroll_loop && old_pos == base_pos + rel_pos && file_list.length > 0 && accel == 1) {
       int limit = (vitashell_config.view_mode != 1) ? MAX_ENTRIES : 30;
       base_pos = (file_list.length > limit) ? file_list.length - limit : 0;
       rel_pos = file_list.length - 1 - base_pos;
@@ -855,7 +855,7 @@ static int fileBrowserMenuCtrl() {
     }
 
     // Infinite scroll: wrap to first item when at bottom (single press only)
-    if (old_pos == base_pos + rel_pos && file_list.length > 0 && accel == 1) {
+    if (vitashell_config.scroll_loop && old_pos == base_pos + rel_pos && file_list.length > 0 && accel == 1) {
       base_pos = 0;
       rel_pos = 0;
     }
@@ -872,14 +872,15 @@ static int fileBrowserMenuCtrl() {
     int old_pos = base_pos + rel_pos;
 
     int limit = (vitashell_config.view_mode != 1) ? MAX_ENTRIES : 30;
+    int skip_amount = vitashell_config.page_speed;
     if (hold_pad[PAD_LTRIGGER]) { // Skip page up
-      base_pos = base_pos - limit;
+      base_pos = base_pos - skip_amount;
       if (base_pos < 0) {
         base_pos = 0;
         rel_pos = 0;
       }
     } else { // Skip page down
-      base_pos = base_pos + limit;
+      base_pos = base_pos + skip_amount;
       if (base_pos >= file_list.length - limit) {
         base_pos = MAX(file_list.length - limit, 0);
         rel_pos = MIN(limit - 1, file_list.length - 1);

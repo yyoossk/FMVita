@@ -358,6 +358,7 @@ int install_thread(SceSize args_size, InstallArguments *args) {
   res = sceIoGetstat(args->file, &stat);
   if (res < 0) {
     closeWaitDialog();
+    install_error_step = 1;
     errorDialog(res);
     goto EXIT;
   }
@@ -367,6 +368,7 @@ int install_thread(SceSize args_size, InstallArguments *args) {
     snprintf(path, MAX_PATH_LENGTH, "%s/sce_sys/param.sfo", args->file);
     if (sceIoGetstat(path, &stat) < 0 || SCE_S_ISDIR(stat.st_mode)) {
       closeWaitDialog();
+      install_error_step = 2;
       errorDialog(-2);
       goto EXIT;
     }
@@ -408,6 +410,7 @@ int install_thread(SceSize args_size, InstallArguments *args) {
     if (res < 0) {
       closeWaitDialog();
       setDialogStep(DIALOG_STEP_CANCELED);
+      install_error_step = 3;
       errorDialog(res);
       goto EXIT;
     }
@@ -421,6 +424,7 @@ int install_thread(SceSize args_size, InstallArguments *args) {
     res = archiveOpen(args->file);
     if (res < 0) {
       closeWaitDialog();
+      install_error_step = 4;
       errorDialog(res);
       goto EXIT;
     }
@@ -438,6 +442,7 @@ int install_thread(SceSize args_size, InstallArguments *args) {
     snprintf(path, MAX_PATH_LENGTH, "%s/sce_sys/param.sfo", args->file);
     if (archiveFileGetstat(path, NULL) < 0) {
       closeWaitDialog();
+      install_error_step = 5;
       errorDialog(-2);
       goto EXIT;
     }
@@ -496,6 +501,7 @@ int install_thread(SceSize args_size, InstallArguments *args) {
     if (res <= 0) {
       closeWaitDialog();
       setDialogStep(DIALOG_STEP_CANCELED);
+      install_error_step = 6;
       errorDialog(res);
       goto EXIT;
     }
@@ -504,6 +510,7 @@ int install_thread(SceSize args_size, InstallArguments *args) {
     res = archiveClose();
     if (res < 0) {
       closeWaitDialog();
+      install_error_step = 7;
       errorDialog(res);
       goto EXIT;
     }
@@ -513,6 +520,7 @@ int install_thread(SceSize args_size, InstallArguments *args) {
   res = makeHeadBin();
   if (res < 0) {
     closeWaitDialog();
+    install_error_step = 8;
     errorDialog(res);
     // If failed, move package folder back
     if (isFolder) sceIoRename(PACKAGE_DIR, args->file);
@@ -523,6 +531,7 @@ int install_thread(SceSize args_size, InstallArguments *args) {
   res = promoteApp(PACKAGE_DIR);
   if (res < 0) {
     closeWaitDialog();
+    install_error_step = 9;
     errorDialog(res);
     // If failed, move package folder back
     if (isFolder) sceIoRename(PACKAGE_DIR, args->file);

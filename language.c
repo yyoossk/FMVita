@@ -340,6 +340,8 @@ void loadLanguage(int id) {
    LANGUAGE_ENTRY(LAUNCH_APP_GAME),
 
    LANGUAGE_ENTRY(VITASHELL_SETTINGS_TRANSITION_MODE),
+   LANGUAGE_ENTRY(VITASHELL_SETTINGS_PAGE_SPEED),
+   LANGUAGE_ENTRY(VITASHELL_SETTINGS_SCROLL_LOOP),
    LANGUAGE_ENTRY(TRANSITION_LATERAL),
    LANGUAGE_ENTRY(TRANSITION_SOFT),
    LANGUAGE_ENTRY(TRANSITION_FADE),
@@ -365,5 +367,11 @@ void loadLanguage(int id) {
       readConfig(path, language_entries, sizeof(language_entries) / sizeof(ConfigEntry));
     }
   }
+}
+
+int getEffectiveLanguage() {
+  if (language_setting == 0)
+    return language;
+  return language_setting - 1;
 }
 

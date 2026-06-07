@@ -72,9 +72,18 @@ void closeWaitDialog() {
   }
 }
 
+int install_error_step = 0;
+
 void errorDialog(int error) {
   if (error < 0) {
-    initMessageDialog(SCE_MSG_DIALOG_BUTTON_TYPE_OK, language_container[ERROR], error);
+    if (install_error_step) {
+      char msg[512];
+      snprintf(msg, sizeof(msg), "Step %d: Error 0x%08X.", install_error_step, error);
+      initMessageDialog(SCE_MSG_DIALOG_BUTTON_TYPE_OK, msg);
+      install_error_step = 0;
+    } else {
+      initMessageDialog(SCE_MSG_DIALOG_BUTTON_TYPE_OK, language_container[ERROR], error);
+    }
     setDialogStep(DIALOG_STEP_ERROR);
   }
 }

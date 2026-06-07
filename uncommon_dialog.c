@@ -408,7 +408,7 @@ int drawUncommonDialog() {
     // Dialog type - build label strings with button positions
     int enter_btn = (enter_button == SCE_SYSTEM_PARAM_ENTER_BUTTON_CIRCLE) ? BUTTON_CIRCLE : BUTTON_CROSS;
     int cancel_btn = (enter_button == SCE_SYSTEM_PARAM_ENTER_BUTTON_CIRCLE) ? BUTTON_CROSS : BUTTON_CIRCLE;
-    int btn_gap = 4;
+    int btn_gap = 40;
     int btn_label_gap = 6;
 
     char btn_string1[64] = "", btn_string2[64] = "";
@@ -479,26 +479,40 @@ int drawUncommonDialog() {
       float bh = FONT_Y_SPACE;
 
       if (has_first) {
-        float bw = first_w + 10;
-        uncommon_dialog.touch_btn_x0 = bx - 5;
-        uncommon_dialog.touch_btn_y0 = by - 4;
-        uncommon_dialog.touch_btn_x1 = bx + bw;
-        uncommon_dialog.touch_btn_y1 = by + bh;
+        float bw = first_w + 30;
+        uncommon_dialog.touch_btn_x0 = bx - 15;
+        uncommon_dialog.touch_btn_y0 = by - 12;
+        uncommon_dialog.touch_btn_x1 = bx + first_w + 15;
+        uncommon_dialog.touch_btn_y1 = by + bh + 12;
         uncommon_dialog.touch_btn1_result = (uncommon_dialog.buttonType == SCE_MSG_DIALOG_BUTTON_TYPE_OK) ? SCE_MSG_DIALOG_BUTTON_ID_OK : SCE_MSG_DIALOG_BUTTON_ID_YES;
         uncommon_dialog.touch_button_count = 1;
+
+        float rect_h = (bh + 24);
+        vita2d_draw_rectangle(uncommon_dialog.touch_btn_x0, uncommon_dialog.touch_btn_y0, bw, rect_h, themeButtonSuccess(vitashell_config.theme_preset));
+        vita2d_draw_rectangle(uncommon_dialog.touch_btn_x0, uncommon_dialog.touch_btn_y0, bw, 2, COLOR_ALPHA(themeTopbarText(vitashell_config.theme_preset), 60));
+        vita2d_draw_rectangle(uncommon_dialog.touch_btn_x0, uncommon_dialog.touch_btn_y0 + rect_h - 2, bw, 2, COLOR_ALPHA(themeTopbarText(vitashell_config.theme_preset), 60));
+        vita2d_draw_rectangle(uncommon_dialog.touch_btn_x0, uncommon_dialog.touch_btn_y0, 2, rect_h, COLOR_ALPHA(themeTopbarText(vitashell_config.theme_preset), 60));
+        vita2d_draw_rectangle(uncommon_dialog.touch_btn_x0 + bw - 2, uncommon_dialog.touch_btn_y0, 2, rect_h, COLOR_ALPHA(themeTopbarText(vitashell_config.theme_preset), 60));
 
         drawButton(first_btn, bx, by + 1);
         pgf_draw_text(bx + BUTTON_SIZE + btn_label_gap, by, DIALOG_COLOR, btn_string1);
         bx += first_w + btn_gap;
       }
       if (has_second) {
-        float bw = second_w + 10;
-        uncommon_dialog.touch_btn2_x0 = bx - 5;
-        uncommon_dialog.touch_btn2_y0 = by - 4;
-        uncommon_dialog.touch_btn2_x1 = bx + bw;
-        uncommon_dialog.touch_btn2_y1 = by + bh;
+        float bw = second_w + 30;
+        uncommon_dialog.touch_btn2_x0 = bx - 15;
+        uncommon_dialog.touch_btn2_y0 = by - 12;
+        uncommon_dialog.touch_btn2_x1 = bx + second_w + 15;
+        uncommon_dialog.touch_btn2_y1 = by + bh + 12;
         uncommon_dialog.touch_btn2_result = (uncommon_dialog.buttonType == SCE_MSG_DIALOG_BUTTON_TYPE_YESNO) ? SCE_MSG_DIALOG_BUTTON_ID_NO : SCE_MSG_DIALOG_BUTTON_ID_NO;
         uncommon_dialog.touch_button_count = 2;
+
+        float rect_h = (bh + 24);
+        vita2d_draw_rectangle(uncommon_dialog.touch_btn2_x0, uncommon_dialog.touch_btn2_y0, bw, rect_h, themeButtonDanger(vitashell_config.theme_preset));
+        vita2d_draw_rectangle(uncommon_dialog.touch_btn2_x0, uncommon_dialog.touch_btn2_y0, bw, 2, COLOR_ALPHA(themeTopbarText(vitashell_config.theme_preset), 60));
+        vita2d_draw_rectangle(uncommon_dialog.touch_btn2_x0, uncommon_dialog.touch_btn2_y0 + rect_h - 2, bw, 2, COLOR_ALPHA(themeTopbarText(vitashell_config.theme_preset), 60));
+        vita2d_draw_rectangle(uncommon_dialog.touch_btn2_x0, uncommon_dialog.touch_btn2_y0, 2, rect_h, COLOR_ALPHA(themeTopbarText(vitashell_config.theme_preset), 60));
+        vita2d_draw_rectangle(uncommon_dialog.touch_btn2_x0 + bw - 2, uncommon_dialog.touch_btn2_y0, 2, rect_h, COLOR_ALPHA(themeTopbarText(vitashell_config.theme_preset), 60));
 
         drawButton(second_btn, bx, by + 1);
         pgf_draw_text(bx + BUTTON_SIZE + btn_label_gap, by, DIALOG_COLOR, btn_string2);

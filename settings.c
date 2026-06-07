@@ -47,7 +47,7 @@ static char *transition_mode_options[4];
 static char *view_mode_options[3];
 static char *theme_preset_options[7];
 
-static char *language_options[19];
+static char *language_options[20];
 
 static char **theme_options = NULL;
 static int theme_count = 0;
@@ -70,7 +70,9 @@ static ConfigEntry settings_entries[] = {
   { "BACKGROUND_ANIM",    CONFIG_TYPE_DECIMAL, (int *)&vitashell_config.background_anim },
   { "TRANSITION_MODE",    CONFIG_TYPE_DECIMAL, (int *)&vitashell_config.transition_mode },
   { "THEME_PRESET",       CONFIG_TYPE_DECIMAL, (int *)&vitashell_config.theme_preset },
-  { "LANGUAGE",           CONFIG_TYPE_DECIMAL, (int *)&language },
+  { "LANGUAGE_V2",        CONFIG_TYPE_DECIMAL, (int *)&language_setting },
+  { "PAGE_SPEED",         CONFIG_TYPE_DECIMAL, (int *)&vitashell_config.page_speed },
+  { "SCROLL_LOOP",        CONFIG_TYPE_BOOLEAN, (int *)&vitashell_config.scroll_loop },
 };
 
 static ConfigEntry theme_entries[] = {
@@ -79,18 +81,18 @@ static ConfigEntry theme_entries[] = {
 
 static void refreshLanguageOptions() {
   const char *lang_names[] = {
-    "Japanese", "English (US)", "French", "Spanish", "German", "Italian",
+    "Auto", "Japanese", "English (US)", "French", "Spanish", "German", "Italian",
     "Dutch", "Portuguese (PT)", "Russian", "Korean", "Chinese (T)", "Chinese (S)",
     "Finnish", "Swedish", "Danish", "Norwegian", "Polish", "Portuguese (BR)", "Turkish"
   };
   int n = sizeof(lang_names) / sizeof(lang_names[0]);
-  for (int i = 0; i < n && i < 19; i++)
+  for (int i = 0; i < n && i < 20; i++)
     language_options[i] = (char *)lang_names[i];
 }
 
 SettingsMenuOption main_settings[] = {
   { VITASHELL_SETTINGS_LANGUAGE,        SETTINGS_OPTION_TYPE_OPTIONS, NULL, NULL, 0,
-    language_options, 19, &language },
+    language_options, 20, &language_setting },
 
   { VITASHELL_SETTINGS_USBDEVICE,       SETTINGS_OPTION_TYPE_OPTIONS, NULL, NULL, 0,
     usbdevice_options, sizeof(usbdevice_options) / sizeof(char **), &vitashell_config.usbdevice },
@@ -108,6 +110,8 @@ SettingsMenuOption main_settings[] = {
     bg_anim_options, sizeof(bg_anim_options) / sizeof(char **), &vitashell_config.background_anim },
   { VITASHELL_SETTINGS_THEME_PRESET,    SETTINGS_OPTION_TYPE_OPTIONS, NULL, NULL, 0,
     theme_preset_options, sizeof(theme_preset_options) / sizeof(char **), &vitashell_config.theme_preset },
+  { VITASHELL_SETTINGS_PAGE_SPEED,      SETTINGS_OPTION_TYPE_INTEGER, NULL, NULL, 0, NULL, 0, &vitashell_config.page_speed },
+  { VITASHELL_SETTINGS_SCROLL_LOOP,     SETTINGS_OPTION_TYPE_BOOLEAN, NULL, NULL, 0, NULL, 0, &vitashell_config.scroll_loop },
 
   { VITASHELL_SETTINGS_RESTART_SHELL,   SETTINGS_OPTION_TYPE_CALLBACK, (void *)restartShell, NULL, 0, NULL, 0, NULL },
 };
@@ -159,6 +163,8 @@ static SettingsMenu settings_menu;
 
 void loadSettingsConfig() {
   memset(&vitashell_config, 0, sizeof(VitaShellConfig));
+  vitashell_config.page_speed = 30;
+  vitashell_config.scroll_loop = 1;
   readConfig("ux0:FMVita/settings.txt", settings_entries, sizeof(settings_entries) / sizeof(ConfigEntry));
 }
 
@@ -561,7 +567,7 @@ void settingsMenuCtrl() {
         if (option->value) {
           if (pressed_pad[PAD_LEFT]) {
             *(option->value) -= 5;
-            if (*(option->value) < 0) *(option->value) = 0;
+            if (*(option->value) < 1) *(option->value) = 1;
           } else if (pressed_pad[PAD_ENTER] || pressed_pad[PAD_RIGHT]) {
             *(option->value) += 5;
             if (*(option->value) > 255) *(option->value) = 255;
@@ -573,7 +579,7 @@ void settingsMenuCtrl() {
 
     // If language changed, reload UI strings
     if (option->name == VITASHELL_SETTINGS_LANGUAGE) {
-      loadLanguage(language);
+      loadLanguage(getEffectiveLanguage());
       refreshSettingsLangStrings();
       language_changed = 1;
     }

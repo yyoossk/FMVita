@@ -311,7 +311,7 @@ int contextMenuHomeEnterCallback(int sel, void *context);
 int contextMenuSortEnterCallback(int sel, void *context);
 
 extern char delete_confirm_message[512];
-extern int delete_confirm_is_folder;
+extern int language, language_setting, enter_button, date_format, time_format;
 void drawHeaderOverlay();
 void drawDeleteConfirmDialog();
 
@@ -475,6 +475,9 @@ static inline unsigned int themeSelectionLine(int preset) {
     default:                 return RGBA8(60, 150, 255, 180);
   }
 }
+
+// Install error diagnostic
+extern int install_error_step;
 
 // Undo system
 extern int undo_available;

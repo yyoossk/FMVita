@@ -789,12 +789,12 @@ int archiveFileOpen(const char *file, int flags, SceMode mode) {
     
   // A file is already open
   if (archive_fd)
-    return -1;
+    return -10;
 
   // Open archive file
   archive_fd = open_archive(archive_file);
   if (!archive_fd)
-    return -1;
+    return -20;
 
   // Traverse
   while (1) {
@@ -805,7 +805,7 @@ int archiveFileOpen(const char *file, int flags, SceMode mode) {
     
     if (res != ARCHIVE_OK) {
       archive_read_free(archive_fd);
-      return -1;
+      return -30;
     }
     
     // Compare pathname
@@ -818,7 +818,7 @@ int archiveFileOpen(const char *file, int flags, SceMode mode) {
   archive_read_free(archive_fd);
   archive_fd = NULL;
 
-  return -1;
+  return -40;
 }
 
 int archiveFileRead(SceUID fd, void *data, SceSize size) {
@@ -826,9 +826,12 @@ int archiveFileRead(SceUID fd, void *data, SceSize size) {
     return psarcFileRead(fd, data, size);
   
   if (!archive_fd || fd != ARCHIVE_FD)
-    return -1;
+    return -50;
 
-  return archive_read_data(archive_fd, data, size);
+  int res = archive_read_data(archive_fd, data, size);
+  if (res < 0)
+    return -60;
+  return res;
 }
 
 int archiveFileClose(SceUID fd) {

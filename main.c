@@ -123,12 +123,18 @@ void drawTouchConfirmDialog() {
   int sim_x = cx + 50, sim_y = cy + 105, sim_w = 190, sim_h = 52;
   vita2d_draw_rectangle(sim_x, sim_y, sim_w, sim_h, themeButtonSuccess(vitashell_config.theme_preset));
   vita2d_draw_rectangle(sim_x, sim_y, sim_w, 2, COLOR_ALPHA(themeTopbarText(vitashell_config.theme_preset), 60));
+  vita2d_draw_rectangle(sim_x, sim_y + sim_h - 2, sim_w, 2, COLOR_ALPHA(themeTopbarText(vitashell_config.theme_preset), 60));
+  vita2d_draw_rectangle(sim_x, sim_y, 2, sim_h, COLOR_ALPHA(themeTopbarText(vitashell_config.theme_preset), 60));
+  vita2d_draw_rectangle(sim_x + sim_w - 2, sim_y, 2, sim_h, COLOR_ALPHA(themeTopbarText(vitashell_config.theme_preset), 60));
   drawButton(enter_btn, sim_x + 20, sim_y + 16);
   draw_centered_text(sim_x + sim_w / 2.0f + 15, sim_y + 16, themeTopbarText(vitashell_config.theme_preset), language_container[CONFIRM_YES_BTN]);
 
   int nao_x = cx + cw - 50 - 190, nao_y = cy + 105, nao_w = 190, nao_h = 52;
   vita2d_draw_rectangle(nao_x, nao_y, nao_w, nao_h, themeButtonDanger(vitashell_config.theme_preset));
   vita2d_draw_rectangle(nao_x, nao_y, nao_w, 2, COLOR_ALPHA(themeTopbarText(vitashell_config.theme_preset), 50));
+  vita2d_draw_rectangle(nao_x, nao_y + nao_h - 2, nao_w, 2, COLOR_ALPHA(themeTopbarText(vitashell_config.theme_preset), 50));
+  vita2d_draw_rectangle(nao_x, nao_y, 2, nao_h, COLOR_ALPHA(themeTopbarText(vitashell_config.theme_preset), 50));
+  vita2d_draw_rectangle(nao_x + nao_w - 2, nao_y, 2, nao_h, COLOR_ALPHA(themeTopbarText(vitashell_config.theme_preset), 50));
   drawButton(cancel_btn, nao_x + 20, nao_y + 16);
   draw_centered_text(nao_x + nao_w / 2.0f + 15, nao_y + 16, themeTopbarText(vitashell_config.theme_preset), language_container[CONFIRM_NO_BTN]);
 }
@@ -181,11 +187,17 @@ void drawFtpTouchDialog() {
   int ok_x = cx + 60, ok_y = cy + 170, ok_w = 180, ok_h = 44;
   vita2d_draw_rectangle(ok_x, ok_y, ok_w, ok_h, themeButtonAccent(vitashell_config.theme_preset));
   vita2d_draw_rectangle(ok_x, ok_y, ok_w, 2, COLOR_ALPHA(themeTopbarText(vitashell_config.theme_preset), 30));
+  vita2d_draw_rectangle(ok_x, ok_y + ok_h - 2, ok_w, 2, COLOR_ALPHA(themeTopbarText(vitashell_config.theme_preset), 30));
+  vita2d_draw_rectangle(ok_x, ok_y, 2, ok_h, COLOR_ALPHA(themeTopbarText(vitashell_config.theme_preset), 30));
+  vita2d_draw_rectangle(ok_x + ok_w - 2, ok_y, 2, ok_h, COLOR_ALPHA(themeTopbarText(vitashell_config.theme_preset), 30));
   draw_centered_text(ok_x + ok_w / 2.0f, ok_y + 12, themeTopbarText(vitashell_config.theme_preset), language_container[OK]);
 
   int stop_x = cx + cw - 60 - 180, stop_y = cy + 170, stop_w = 180, stop_h = 44;
   vita2d_draw_rectangle(stop_x, stop_y, stop_w, stop_h, themeButtonDanger(vitashell_config.theme_preset));
   vita2d_draw_rectangle(stop_x, stop_y, stop_w, 2, COLOR_ALPHA(themeTopbarText(vitashell_config.theme_preset), 30));
+  vita2d_draw_rectangle(stop_x, stop_y + stop_h - 2, stop_w, 2, COLOR_ALPHA(themeTopbarText(vitashell_config.theme_preset), 30));
+  vita2d_draw_rectangle(stop_x, stop_y, 2, stop_h, COLOR_ALPHA(themeTopbarText(vitashell_config.theme_preset), 30));
+  vita2d_draw_rectangle(stop_x + stop_w - 2, stop_y, 2, stop_h, COLOR_ALPHA(themeTopbarText(vitashell_config.theme_preset), 30));
   draw_centered_text(stop_x + stop_w / 2.0f, stop_y + 12, themeTopbarText(vitashell_config.theme_preset), language_container[FTP_STOP_LABEL]);
 }
 
@@ -239,12 +251,18 @@ void drawQrTouchDialog() {
     int sim_x = cx + 50, sim_y = cy + 180, sim_w = 190, sim_h = 52;
     vita2d_draw_rectangle(sim_x, sim_y, sim_w, sim_h, themeButtonSuccess(vitashell_config.theme_preset));
     vita2d_draw_rectangle(sim_x, sim_y, sim_w, 2, COLOR_ALPHA(themeTopbarText(vitashell_config.theme_preset), 60));
+    vita2d_draw_rectangle(sim_x, sim_y + sim_h - 2, sim_w, 2, COLOR_ALPHA(themeTopbarText(vitashell_config.theme_preset), 60));
+    vita2d_draw_rectangle(sim_x, sim_y, 2, sim_h, COLOR_ALPHA(themeTopbarText(vitashell_config.theme_preset), 60));
+    vita2d_draw_rectangle(sim_x + sim_w - 2, sim_y, 2, sim_h, COLOR_ALPHA(themeTopbarText(vitashell_config.theme_preset), 60));
     drawButton(enter_btn, sim_x + 20, sim_y + 16);
     draw_centered_text(sim_x + sim_w / 2.0f + 15, sim_y + 16, themeTopbarText(vitashell_config.theme_preset), language_container[YES]);
 
     int nao_x = cx + cw - 50 - 190, nao_y = cy + 180, nao_w = 190, nao_h = 52;
     vita2d_draw_rectangle(nao_x, nao_y, nao_w, nao_h, themeButtonDanger(vitashell_config.theme_preset));
     vita2d_draw_rectangle(nao_x, nao_y, nao_w, 2, COLOR_ALPHA(themeTopbarText(vitashell_config.theme_preset), 50));
+    vita2d_draw_rectangle(nao_x, nao_y + nao_h - 2, nao_w, 2, COLOR_ALPHA(themeTopbarText(vitashell_config.theme_preset), 50));
+    vita2d_draw_rectangle(nao_x, nao_y, 2, nao_h, COLOR_ALPHA(themeTopbarText(vitashell_config.theme_preset), 50));
+    vita2d_draw_rectangle(nao_x + nao_w - 2, nao_y, 2, nao_h, COLOR_ALPHA(themeTopbarText(vitashell_config.theme_preset), 50));
     drawButton(cancel_btn, nao_x + 20, nao_y + 16);
     draw_centered_text(nao_x + nao_w / 2.0f + 15, nao_y + 16, themeTopbarText(vitashell_config.theme_preset), language_container[NO]);
   } else {
@@ -260,12 +278,18 @@ void drawQrTouchDialog() {
     int sim_x = cx + 50, sim_y = cy + 180, sim_w = 190, sim_h = 52;
     vita2d_draw_rectangle(sim_x, sim_y, sim_w, sim_h, themeButtonSuccess(vitashell_config.theme_preset));
     vita2d_draw_rectangle(sim_x, sim_y, sim_w, 2, COLOR_ALPHA(themeTopbarText(vitashell_config.theme_preset), 60));
+    vita2d_draw_rectangle(sim_x, sim_y + sim_h - 2, sim_w, 2, COLOR_ALPHA(themeTopbarText(vitashell_config.theme_preset), 60));
+    vita2d_draw_rectangle(sim_x, sim_y, 2, sim_h, COLOR_ALPHA(themeTopbarText(vitashell_config.theme_preset), 60));
+    vita2d_draw_rectangle(sim_x + sim_w - 2, sim_y, 2, sim_h, COLOR_ALPHA(themeTopbarText(vitashell_config.theme_preset), 60));
     drawButton(enter_btn, sim_x + 20, sim_y + 16);
     draw_centered_text(sim_x + sim_w / 2.0f + 15, sim_y + 16, themeTopbarText(vitashell_config.theme_preset), language_container[YES]);
 
     int nao_x = cx + cw - 50 - 190, nao_y = cy + 180, nao_w = 190, nao_h = 52;
     vita2d_draw_rectangle(nao_x, nao_y, nao_w, nao_h, themeButtonDanger(vitashell_config.theme_preset));
     vita2d_draw_rectangle(nao_x, nao_y, nao_w, 2, COLOR_ALPHA(themeTopbarText(vitashell_config.theme_preset), 50));
+    vita2d_draw_rectangle(nao_x, nao_y + nao_h - 2, nao_w, 2, COLOR_ALPHA(themeTopbarText(vitashell_config.theme_preset), 50));
+    vita2d_draw_rectangle(nao_x, nao_y, 2, nao_h, COLOR_ALPHA(themeTopbarText(vitashell_config.theme_preset), 50));
+    vita2d_draw_rectangle(nao_x + nao_w - 2, nao_y, 2, nao_h, COLOR_ALPHA(themeTopbarText(vitashell_config.theme_preset), 50));
     drawButton(cancel_btn, nao_x + 20, nao_y + 16);
     draw_centered_text(nao_x + nao_w / 2.0f + 15, nao_y + 16, themeTopbarText(vitashell_config.theme_preset), language_container[NO]);
   }
@@ -1642,7 +1666,21 @@ int dialogSteps() {
 
 static void ftp_log_cb(const char *msg) {
   if (msg) {
-    strncpy(ftp_status_msg, msg, 255);
+    if (strncmp(msg, "STOR ", 5) == 0) {
+      char *path = strrchr(msg + 5, '/');
+      if (path) path++; else path = (char *)msg + 5;
+      snprintf(ftp_status_msg, 255, "%s: %s", language_container[RECEIVING], path);
+    } else if (strncmp(msg, "RETR ", 5) == 0) {
+      char *path = strrchr(msg + 5, '/');
+      if (path) path++; else path = (char *)msg + 5;
+      snprintf(ftp_status_msg, 255, "%s: %s", language_container[SENDING], path);
+    } else if (strncmp(msg, "DELE ", 5) == 0) {
+      char *path = strrchr(msg + 5, '/');
+      if (path) path++; else path = (char *)msg + 5;
+      snprintf(ftp_status_msg, 255, "%s: %s", language_container[DELETING], path);
+    } else {
+      strncpy(ftp_status_msg, msg, 255);
+    }
     ftp_status_msg[255] = '\0';
   }
 }
@@ -1674,7 +1712,7 @@ int main(int argc, const char *argv[]) {
   // Load stuff
   loadSettingsConfig();
   loadTheme();
-  loadLanguage(language);
+  loadLanguage(getEffectiveLanguage());
 
   // Init context menu width
   initContextMenuWidth();

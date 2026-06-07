@@ -49,6 +49,8 @@ typedef struct {
   int background_anim;
   int theme_preset;
   int transition_mode;
+  int page_speed;
+  int scroll_loop;
 } VitaShellConfig;
 
 #endif

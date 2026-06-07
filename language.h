@@ -299,6 +299,8 @@ enum LanguageContainer {
   LAUNCH_APP_GAME,
 
   VITASHELL_SETTINGS_TRANSITION_MODE,
+  VITASHELL_SETTINGS_PAGE_SPEED,
+  VITASHELL_SETTINGS_SCROLL_LOOP,
   TRANSITION_LATERAL,
   TRANSITION_SOFT,
   TRANSITION_FADE,
@@ -311,5 +313,6 @@ extern char *language_container[LANGUAGE_CONTAINER_SIZE];
 
 void freeLanguageContainer();
 void loadLanguage(int id);
+int getEffectiveLanguage();
 
 #endif

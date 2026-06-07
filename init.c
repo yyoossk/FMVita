@@ -178,7 +178,7 @@ int is_safe_mode = 0;
 SceUID patch_modid = -1, kernel_modid = -1, user_modid = -1;
 
 // System params
-int language = 0, enter_button = 0, date_format = 0, time_format = 0;
+int language = 0, language_setting = 0, enter_button = 0, date_format = 0, time_format = 0;
 
 int isSafeMode() {
   return is_safe_mode;

@@ -311,6 +311,7 @@ int contextMenuHomeEnterCallback(int sel, void *context);
 int contextMenuSortEnterCallback(int sel, void *context);
 
 extern char delete_confirm_message[512];
+extern int delete_confirm_is_folder;
 extern int language, language_setting, enter_button, date_format, time_format;
 void drawHeaderOverlay();
 void drawDeleteConfirmDialog();

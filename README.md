@@ -21,7 +21,7 @@
 **FMVita** is an enhanced fork of **VitaShell** (originally created by *TheFloW*). This version focuses on **usability**, expanding touchscreen support for the PS Vita, introducing animated backgrounds, various Quality of Life (QoL) improvements, and a new program file organization under the independent directory `ux0:FMVita/`.
 
 <div align="center">
-  <img src="https://github.com/WolffsRoom/FMVita/blob/master/media/Media/FMVita_Image/2026-05-23-003448-063842.png" alt="Home Screen" width="80%">
+  <img src="https://github.com/WolffsRoom/FMVita/blob/master/Screenshots/Tr%C3%AAs%20colunas.png" alt="3 Columns View" width="80%">
 </div>
 
 ---
@@ -40,7 +40,8 @@ FMVita was designed to prevent conflicts with your current configuration. Theref
 ### Interface and Themes
 
 <div align="center">
-  <img src="https://github.com/WolffsRoom/FMVita/blob/master/media/Media/FMVita_Image/2026-05-23-003456-739293.png" alt="Grid Mode" width="80%">
+  <img src="https://github.com/WolffsRoom/FMVita/blob/master/Screenshots/Tela%20Inicial%20(Grid).png" alt="Grid View" width="49%">
+  <img src="https://github.com/WolffsRoom/FMVita/blob/master/Screenshots/FundobrancoWaves.png" alt="Waves Background - Light Theme" width="49%">
 </div>
 
 * **Eight Color Presets:** *Dark, Light, Blue, Red, Purple, Brown, Gray*, and *Custom*. The system automatically calculates text, highlight, selection, dialog, and border colors.
@@ -59,10 +60,6 @@ FMVita was designed to prevent conflicts with your current configuration. Theref
 
 ### Touchscreen Support
 
-<div align="center">
-  <img src="https://github.com/WolffsRoom/FMVita/raw/master/media/FTP%20Server.png" alt="FTP Server" width="80%">
-</div>
-
 * **Native Dialogs:** The old system YES/NO prompt has been replaced by custom **Touch Dialogs** (Confirmation, Deletion, and FTP) styled with PlayStation button icons.
 * **Drag-and-Drop:** Hold `Square` + Touch (or perform a long press) to drag files into other folders. Features *Auto-scroll* when moving items near the screen edges.
 * **Swipe Gestures:** Swipe Left to go *Back*, Swipe Right to *Enter*.
@@ -72,8 +69,8 @@ FMVita was designed to prevent conflicts with your current configuration. Theref
 ### Navigation and Layout
 
 <div align="center">
-  <img src="https://github.com/WolffsRoom/FMVita/raw/master/media/Modo%20Coluna.png" alt="Column Mode 1" width="49%">
-  <img src="https://github.com/WolffsRoom/FMVita/blob/master/media/Media/FMVita_Image/2026-05-23-003541-050146.png" alt="Column Mode 2" width="49%">
+  <img src="https://github.com/WolffsRoom/FMVita/blob/master/Screenshots/Tr%C3%AAs%20colunas.png" alt="3 Columns View" width="49%">
+  <img src="https://github.com/WolffsRoom/FMVita/blob/master/Screenshots/Tela%20Inicial%20(Grid).png" alt="Grid View" width="49%">
 </div>
 
 * **View Modes:** Four layout options available under Settings → View Mode:
@@ -91,6 +88,10 @@ FMVita was designed to prevent conflicts with your current configuration. Theref
 
 ### VPK Management
 
+<div align="center">
+  <img src="https://github.com/WolffsRoom/FMVita/blob/master/Screenshots/Instalar%20VPK.png" alt="VPK Installation Dialog" width="80%">
+</div>
+
 * **Batch VPK Installation:** Mark multiple VPK files and install them all sequentially in one go — no need to install one at a time.
 * **Background VPK Installation:** VPK installation runs from the file browser, no longer dependent on PKGj.
 * **Post-Install Launch:** Optionally launch the just-installed application directly after installation.
@@ -98,10 +99,23 @@ FMVita was designed to prevent conflicts with your current configuration. Theref
 
 ### FTP Server
 
+<div align="center">
+  <img src="https://github.com/WolffsRoom/FMVita/blob/master/Screenshots/FTP.png" alt="FTP Server Dialog" width="80%">
+</div>
+
 * **Wi-Fi Auto-Check:** If Wi-Fi is off, FMVita will prompt you to enable it before starting the FTP server — no more silent failures.
 * **Improved Status Messages:** FTP operations now display human-readable progress descriptions and current activity (upload, download, rename, etc.).
 * **Progress Tracking:** File transfer operations show 0–100% progress in the FTP status modal.
 * **Auto-Refresh on Close:** The current folder is automatically refreshed when the FTP server is stopped.
+
+### Image Viewer
+
+<div align="center">
+  <img src="https://github.com/WolffsRoom/FMVita/blob/master/Screenshots/PreviewImagem.png" alt="Image Preview" width="80%">
+</div>
+
+* Open any PNG, JPEG, BMP, or GIF image directly from the file browser.
+* Supports **zoom**, **pan**, and **mirror** operations with touch and button controls.
 
 ### Undo System
 
@@ -113,7 +127,7 @@ FMVita was designed to prevent conflicts with your current configuration. Theref
 ### Security and Configuration
 
 <div align="center">
-  <img src="https://github.com/WolffsRoom/FMVita/raw/master/media/Tela%20de%20Config.png" alt="Configuration Screen" width="80%">
+  <img src="https://github.com/WolffsRoom/FMVita/blob/master/Screenshots/Menu%20Options.png" alt="Settings Screen" width="80%">
 </div>
 
 * **System Protection:** Renaming locks on critical system folders (verified via `isProtectedPath()`) with custom error messages.

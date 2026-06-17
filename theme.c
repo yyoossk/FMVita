@@ -388,6 +388,69 @@ void freeGifBackground() {
   gif_loaded_path[0] = '\0';
 }
 
+static int verifyGifHeader(const char *path) {
+  FILE *f = fopen(path, "rb");
+  if (!f) return 0;
+  
+  unsigned char header[13];
+  int read = fread(header, 1, 13, f);
+  fclose(f);
+  
+  if (read < 13) return 0;
+  
+  if (header[0] != 'G' || header[1] != 'I' || header[2] != 'F' ||
+      header[3] != '8' || (header[4] != '9' && header[4] != '7') ||
+      header[5] != 'a') {
+    return 0;
+  }
+  
+  unsigned int width = header[6] | (header[7] << 8);
+  unsigned int height = header[8] | (header[9] << 8);
+  
+  if (width == 960 && (height == 540 || height == 544)) {
+    return 1;
+  }
+  
+  return 0;
+}
+
+static FILE *open_and_verify_gif(const char *path) {
+  if (strncmp(path, "ux0:", 4) == 0) {
+    if (!verifyGifHeader(path)) return NULL;
+  }
+  return fopen(path, "rb");
+}
+
+static int verifyPngHeader(const char *path) {
+  FILE *f = fopen(path, "rb");
+  if (!f) return 0;
+  
+  unsigned char header[30];
+  int read = fread(header, 1, 30, f);
+  fclose(f);
+  
+  if (read < 29) return 0;
+  
+  if (header[0] != 0x89 || header[1] != 0x50 || header[2] != 0x4E || header[3] != 0x47 ||
+      header[4] != 0x0D || header[5] != 0x0A || header[6] != 0x1A || header[7] != 0x0A) {
+    return 0;
+  }
+  
+  if (header[12] != 'I' || header[13] != 'H' || header[14] != 'D' || header[15] != 'R') {
+    return 0;
+  }
+  
+  unsigned int width = (header[16] << 24) | (header[17] << 16) | (header[18] << 8) | header[19];
+  unsigned int height = (header[20] << 24) | (header[21] << 16) | (header[22] << 8) | header[23];
+  unsigned char bit_depth = header[24];
+  
+  if (width == 960 && (height == 540 || height == 544) && bit_depth == 8) {
+    return 1;
+  }
+  
+  return 0;
+}
+
 void loadGifBackground() {
   freeGifBackground();
 
@@ -418,23 +481,23 @@ void loadGifBackground() {
   // 2. Try FMVita/Gif (primary user choice directory)
   if (!f) {
     snprintf(path, MAX_PATH_LENGTH, "ux0:FMVita/Gif/theme.gif");
-    f = fopen(path, "rb");
+    f = open_and_verify_gif(path);
     if (!f) {
       snprintf(path, MAX_PATH_LENGTH, "ux0:FMVita/GIF/theme.gif");
-      f = fopen(path, "rb");
+      f = open_and_verify_gif(path);
     }
   }
 
   // 3. Try theme folder fallbacks if still not found
   if (!f) {
     snprintf(path, MAX_PATH_LENGTH, "ux0:FMVita/theme/%s/GIF/theme.gif", active_theme);
-    f = fopen(path, "rb");
+    f = open_and_verify_gif(path);
     if (!f) {
       snprintf(path, MAX_PATH_LENGTH, "ux0:FMVita/theme/default/GIF/theme.gif");
-      f = fopen(path, "rb");
+      f = open_and_verify_gif(path);
       if (!f) {
         snprintf(path, MAX_PATH_LENGTH, "ux0:FMVita/theme/GIF/theme.gif");
-        f = fopen(path, "rb");
+        f = open_and_verify_gif(path);
       }
     }
   }
@@ -489,14 +552,19 @@ void loadPngBackground() {
   if (vitashell_config.background_anim != 8) return;
 
   png_bg_texture = vita2d_load_PNG_file("app0:Theme/GIF/theme.png");
-  if (!png_bg_texture)
-    png_bg_texture = vita2d_load_PNG_file("ux0:FMVita/Background/bg.png");
+  if (!png_bg_texture) {
+    const char *custom_path = "ux0:FMVita/Background/bg.png";
+    if (checkFileExist(custom_path) && verifyPngHeader(custom_path)) {
+      png_bg_texture = vita2d_load_PNG_file(custom_path);
+    }
+  }
   if (!png_bg_texture)
     png_bg_texture = vita2d_load_PNG_file("app0:Background/bg.png");
   if (png_bg_texture) {
     vita2d_texture_set_filters(png_bg_texture, SCE_GXM_TEXTURE_FILTER_LINEAR, SCE_GXM_TEXTURE_FILTER_LINEAR);
   }
 }
+
 
 void updateGifBackground() {
   if (vitashell_config.background_anim != 7) return;

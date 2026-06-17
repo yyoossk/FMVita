@@ -910,8 +910,10 @@ int dialogSteps() {
       } else if (pressed_pad[PAD_ENTER]) {
         powerUnlock();
         ftpvita_fini();
+        refreshFileList();
         setDialogStep(DIALOG_STEP_NONE);
       }
+
       break;
     }
 
@@ -1669,21 +1671,52 @@ static void ftp_log_cb(const char *msg) {
     if (strncmp(msg, "STOR ", 5) == 0) {
       char *path = strrchr(msg + 5, '/');
       if (path) path++; else path = (char *)msg + 5;
-      snprintf(ftp_status_msg, 255, "%s: %s", language_container[RECEIVING], path);
+      char clean_path[256];
+      strncpy(clean_path, path, 255);
+      clean_path[255] = '\0';
+      int len = strlen(clean_path);
+      while (len > 0 && (clean_path[len-1] == '\r' || clean_path[len-1] == '\n')) {
+        clean_path[len-1] = '\0';
+        len--;
+      }
+      snprintf(ftp_status_msg, 255, "Recebendo: %s", clean_path);
     } else if (strncmp(msg, "RETR ", 5) == 0) {
       char *path = strrchr(msg + 5, '/');
       if (path) path++; else path = (char *)msg + 5;
-      snprintf(ftp_status_msg, 255, "%s: %s", language_container[SENDING], path);
+      char clean_path[256];
+      strncpy(clean_path, path, 255);
+      clean_path[255] = '\0';
+      int len = strlen(clean_path);
+      while (len > 0 && (clean_path[len-1] == '\r' || clean_path[len-1] == '\n')) {
+        clean_path[len-1] = '\0';
+        len--;
+      }
+      snprintf(ftp_status_msg, 255, "Enviando: %s", clean_path);
     } else if (strncmp(msg, "DELE ", 5) == 0) {
       char *path = strrchr(msg + 5, '/');
       if (path) path++; else path = (char *)msg + 5;
-      snprintf(ftp_status_msg, 255, "%s: %s", language_container[DELETING], path);
+      char clean_path[256];
+      strncpy(clean_path, path, 255);
+      clean_path[255] = '\0';
+      int len = strlen(clean_path);
+      while (len > 0 && (clean_path[len-1] == '\r' || clean_path[len-1] == '\n')) {
+        clean_path[len-1] = '\0';
+        len--;
+      }
+      snprintf(ftp_status_msg, 255, "Excluindo: %s", clean_path);
+    } else if (strncmp(msg, "MKD ", 4) == 0) {
+      snprintf(ftp_status_msg, 255, "Criando pasta...");
+    } else if (strncmp(msg, "RMD ", 4) == 0) {
+      snprintf(ftp_status_msg, 255, "Removendo pasta...");
+    } else if (strncmp(msg, "RNFR ", 5) == 0 || strncmp(msg, "RNTO ", 5) == 0) {
+      snprintf(ftp_status_msg, 255, "Renomeando...");
     } else {
       strncpy(ftp_status_msg, msg, 255);
     }
     ftp_status_msg[255] = '\0';
   }
 }
+
 
 void ftpvita_PROM(ftpvita_client_info_t *client) {
   char cmd[64];

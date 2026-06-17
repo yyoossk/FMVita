@@ -14,7 +14,7 @@ project(FileManager)
 include("${VITASDK}/share/vita.cmake" REQUIRED)
 set(VITA_APP_NAME "FileManager")
 set(VITA_TITLEID  "FILEMNGR1")
-set(VITA_VERSION  "02.02")
+set(VITA_VERSION  "05.00")
 
 # Flags and includes
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=gnu11 -Wl,-q -Wall -Os -Wno-unused-variable -Wno-unused-but-set-variable -Wno-format-truncation -fno-lto")
@@ -228,7 +228,7 @@ vita_create_vpk(FileManager.vpk ${VITA_TITLEID} eboot.bin
        pkg/sce_sys/livearea/contents/bg0.png sce_sys/livearea/contents/bg0.png
        pkg/sce_sys/livearea/contents/default_gate.png sce_sys/livearea/contents/default_gate.png
        pkg/sce_sys/livearea/contents/template.xml sce_sys/livearea/contents/template.xml
-       l10n/ l10n/
+       l10n l10n
        Theme/GIF/theme.gif Theme/GIF/theme.gif
        Theme/GIF/theme.png Theme/GIF/theme.png
 )

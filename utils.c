@@ -240,14 +240,24 @@ void readPad() {
     hold2_pad[i] = pressed_pad[i];
     
     if (current_pad[i]) {
-      if (hold_count[i] >= 10) {
+      int speed = vitashell_config.page_speed;
+      if (speed < 1) speed = 1;
+      int delay = 300 / speed;
+      if (delay < 2) delay = 2;
+      if (delay > 60) delay = 60;
+      
+      int repeat_delay = 120 / speed;
+      if (repeat_delay < 1) repeat_delay = 1;
+      if (repeat_delay > 30) repeat_delay = 30;
+
+      if (hold_count[i] >= delay) {
         hold_pad[i] = 1;
-        hold_count[i] = 6;
+        hold_count[i] = delay - repeat_delay;
       }
 
-      if (hold2_count[i] >= 10) {
+      if (hold2_count[i] >= delay) {
         hold2_pad[i] = 1;
-        hold2_count[i] = 10;
+        hold2_count[i] = 0; // reset to 0 so it repeats at delay intervals
       }
 
       hold_count[i]++;
@@ -256,6 +266,7 @@ void readPad() {
       hold_count[i] = 0;
       hold2_count[i] = 0;
     }
+
   }
   
   if (enter_button == SCE_SYSTEM_PARAM_ENTER_BUTTON_CIRCLE) {

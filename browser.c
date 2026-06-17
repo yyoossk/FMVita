@@ -62,7 +62,9 @@ INCLUDE_EXTERN_RESOURCE(default_mouse_png);
 
 // Forward declarations for folder transition
 void captureFolderTransition(int dir);
-void drawFolderTransition();
+void updateFolderTransition();
+static float transition_offset_x = 0.0f;
+static unsigned char transition_alpha = 255;
 
 #define MAX_TRANSITION_ENTRIES 60
 
@@ -479,7 +481,7 @@ int refreshFileList() {
       base_pos = 0;
     }
   }
-  if (vitashell_config.view_mode == 2) {
+  if (vitashell_config.view_mode == 2 || vitashell_config.view_mode == 3) {
     if (dir_level > 0) {
       char parent_path[MAX_PATH_LENGTH];
       snprintf(parent_path, MAX_PATH_LENGTH, "%s", file_list.path);
@@ -504,7 +506,7 @@ int refreshFileList() {
         fileListGetEntries(&parent_list, parent_path, sort_mode);
       }
 
-      if (dir_level > 1) {
+      if (vitashell_config.view_mode == 3 && dir_level > 1) {
         char gparent_path[MAX_PATH_LENGTH];
         snprintf(gparent_path, MAX_PATH_LENGTH, "%s", parent_path);
         len = strlen(gparent_path);
@@ -535,6 +537,7 @@ int refreshFileList() {
     fileListEmpty(&parent_list);
     fileListEmpty(&grandparent_list);
   }
+
 
   return ret;
 }
@@ -775,24 +778,32 @@ static int fileBrowserMenuCtrl() {
       }
     } else if (vitashell_config.select_button == SELECT_BUTTON_MODE_FTP ||
                sceKernelGetModel() == SCE_KERNEL_MODEL_VITATV) {
-      // Init FTP
-      if (!ftpvita_is_initialized()) {
-        int res = ftpvita_init(vita_ip, &vita_port);
-        if (res < 0) {
-          initMessageDialog(SCE_MSG_DIALOG_BUTTON_TYPE_CANCEL, language_container[PLEASE_WAIT]);
-          setDialogStep(DIALOG_STEP_FTP_WAIT);
-        } else {
-          initFtp();
+      // Check Wi-Fi state first
+      int wifi_state = 0;
+      sceNetCtlInetGetState(&wifi_state);
+      if (wifi_state != 3) {
+        infoDialog(language_container[WIFI_ERROR]);
+      } else {
+        // Init FTP
+        if (!ftpvita_is_initialized()) {
+          int res = ftpvita_init(vita_ip, &vita_port);
+          if (res < 0) {
+            initMessageDialog(SCE_MSG_DIALOG_BUTTON_TYPE_CANCEL, language_container[PLEASE_WAIT]);
+            setDialogStep(DIALOG_STEP_FTP_WAIT);
+          } else {
+            initFtp();
+          }
+
+          // Lock power timers
+          powerLock();
         }
 
-        // Lock power timers
-        powerLock();
+        // Dialog - custom touch FTP dialog
+        if (ftpvita_is_initialized()) {
+          setDialogStep(DIALOG_STEP_FTP_TOUCH);
+        }
       }
 
-      // Dialog - custom touch FTP dialog
-      if (ftpvita_is_initialized()) {
-        setDialogStep(DIALOG_STEP_FTP_TOUCH);
-      }
     } else if (vitashell_config.select_button == SELECT_BUTTON_MODE_QR) {
       if (!enabledQR()) {
         initQR();
@@ -1093,33 +1104,20 @@ static void fileBrowserHandleSymlink(FileListEntry *file_entry) {
 void captureFolderTransition(int dir) {
   if (!transition_ready) return;
 
-  transition_count = 0;
   transition_dir = dir;
-
-  int max_visible = GET_MAX_POSITION();
-  int end = base_pos + max_visible;
-  if (end > file_list.length) end = file_list.length;
-
-  int i;
-  for (i = base_pos; i < end && transition_count < MAX_TRANSITION_ENTRIES; i++) {
-    FileListEntry *entry = fileListGetNthEntry(&file_list, i);
-    if (entry) {
-      strcpy(transition_names[transition_count], entry->name);
-      transition_types[transition_count] = entry->type;
-      transition_is_folder[transition_count] = entry->is_folder;
-      transition_indices[transition_count] = i;
-      transition_sizes[transition_count] = entry->size;
-      transition_count++;
-    }
-  }
-
   transition_progress = 0.0f;
   transition_active = 1;
   transition_ready = 0;
+  transition_offset_x = 0.0f;
+  transition_alpha = 255;
 }
 
-void drawFolderTransition() {
-  if (!transition_active) return;
+void updateFolderTransition() {
+  if (!transition_active) {
+    transition_offset_x = 0.0f;
+    transition_alpha = 255;
+    return;
+  }
 
   int mode = vitashell_config.transition_mode;
   float step = 0.0f;
@@ -1130,7 +1128,7 @@ void drawFolderTransition() {
       step = 0.12f;
       break;
     case TRANSITION_MODE_SMOOTH_SLIDE:
-      step = 0.06f;
+      step = 0.08f;
       alpha_effect = 1;
       break;
     case TRANSITION_MODE_FADE:
@@ -1139,87 +1137,42 @@ void drawFolderTransition() {
     default:
       transition_active = 0;
       transition_ready = 1;
+      transition_offset_x = 0.0f;
+      transition_alpha = 255;
       return;
   }
 
-  if (transition_dir == 0) {
-    transition_progress += step;
-    if (transition_progress >= 1.0f) {
-      transition_progress = 1.0f;
-      transition_active = 0;
-      transition_ready = 1;
-      return;
-    }
-  } else {
-    transition_progress -= step;
-    if (transition_progress <= 0.0f) {
-      transition_progress = 0.0f;
-      transition_active = 0;
-      transition_ready = 1;
-      return;
-    }
-  }
-
-  float offset;
-  unsigned int alpha = 255;
-
-  if (mode == TRANSITION_MODE_FADE) {
-    if (transition_dir == 0) {
-      alpha = (unsigned int)((1.0f - transition_progress) * 255.0f);
-    } else {
-      alpha = (unsigned int)(transition_progress * 255.0f);
-    }
-
-    vita2d_draw_rectangle(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, COLOR_ALPHA(themeBgColor(vitashell_config.theme_preset), alpha));
+  transition_progress += step;
+  if (transition_progress >= 1.0f) {
+    transition_progress = 1.0f;
+    transition_active = 0;
+    transition_ready = 1;
+    transition_offset_x = 0.0f;
+    transition_alpha = 255;
     return;
   }
 
-  if (transition_dir == 0) {
-    offset = -(1.0f - transition_progress) * SCREEN_WIDTH;
-    if (alpha_effect) alpha = (unsigned int)(transition_progress * 255.0f);
-    else alpha = 255;
+  if (mode == TRANSITION_MODE_FADE) {
+    transition_offset_x = 0.0f;
+    transition_alpha = (unsigned char)(transition_progress * 255.0f);
   } else {
-    offset = transition_progress * SCREEN_WIDTH;
-    if (alpha_effect) alpha = (unsigned int)((1.0f - transition_progress) * 255.0f);
-    else alpha = 255;
-  }
-
-  unsigned int text_color = COLOR_ALPHA(themeTextColor(vitashell_config.theme_preset), alpha);
-  unsigned int dim_color = COLOR_ALPHA(themeTextDim(vitashell_config.theme_preset), alpha);
-  unsigned int folder_color = COLOR_ALPHA(themeFolderColor(vitashell_config.theme_preset), alpha);
-  unsigned int list_bg = COLOR_ALPHA(themeListBg(vitashell_config.theme_preset), alpha);
-  unsigned int sel_bg = COLOR_ALPHA(themeSelectionBg(vitashell_config.theme_preset), alpha);
-  unsigned int sel_line = COLOR_ALPHA(themeSelectionLine(vitashell_config.theme_preset), alpha);
-
-  int draw_count = transition_count;
-  int limit = GET_MAX_POSITION();
-  if (draw_count > limit) draw_count = limit;
-
-  int i;
-  for (i = 0; i < draw_count; i++) {
-    float y = START_Y + i * FONT_Y_SPACE + offset;
-    if (y + FONT_Y_SPACE < START_Y || y > SCREEN_HEIGHT) continue;
-
-    vita2d_draw_rectangle(SHELL_MARGIN_X, y, MAX_WIDTH, FONT_Y_SPACE, list_bg);
-
-    if (transition_indices[i] == base_pos + rel_pos) {
-      vita2d_draw_rectangle(SHELL_MARGIN_X, y, MAX_WIDTH, FONT_Y_SPACE, sel_bg);
-      vita2d_draw_rectangle(SHELL_MARGIN_X, y, 4, FONT_Y_SPACE, sel_line);
-    }
-
-    if (transition_is_folder[i]) {
-      pgf_draw_text(FILE_X, y, folder_color, transition_names[i]);
+    // Slide modes
+    if (transition_dir == 0) {
+      // Entering directory: slide in from right
+      transition_offset_x = (1.0f - transition_progress) * SCREEN_WIDTH;
     } else {
-      pgf_draw_text(FILE_X, y, text_color, transition_names[i]);
+      // Going up directory: slide in from left
+      transition_offset_x = -(1.0f - transition_progress) * SCREEN_WIDTH;
     }
-
-    if (!transition_is_folder[i]) {
-      char size_str[64];
-      getSizeString(size_str, transition_sizes[i]);
-      pgf_draw_text(INFORMATION_X, y, dim_color, size_str);
+    
+    if (alpha_effect) {
+      transition_alpha = (unsigned char)(transition_progress * 255.0f);
+    } else {
+      transition_alpha = 255;
     }
   }
 }
+
 
 int browserMain() {
   // Position
@@ -1689,13 +1642,17 @@ skip_touch_processing:
                          } else {
                             int clicked_index = 0;
                             
-                            if (vitashell_config.view_mode == 2 && dir_level > 0 && touch_y_last > START_Y) {
+                            if ((vitashell_config.view_mode == 2 || vitashell_config.view_mode == 3) && dir_level > 0 && touch_y_last > START_Y) {
                                 int num_columns = 1;
                                 if (parent_list.length > 0) num_columns = 2;
-                                if (grandparent_list.length > 0) num_columns = 3;
+                                if (vitashell_config.view_mode == 3 && grandparent_list.length > 0) num_columns = 3;
                                 float c_x = SHELL_MARGIN_X;
-                                if (num_columns == 2) c_x = SHELL_MARGIN_X + 300.0f;
-                                else if (num_columns == 3) c_x = SHELL_MARGIN_X + 600.0f;
+                                if (vitashell_config.view_mode == 2) {
+                                    if (num_columns == 2) c_x = SHELL_MARGIN_X + 465.0f;
+                                } else {
+                                    if (num_columns == 2) c_x = SHELL_MARGIN_X + 300.0f;
+                                    else if (num_columns == 3) c_x = SHELL_MARGIN_X + 600.0f;
+                                }
                                 if (touch_x_last < c_x) {
                                     if (num_columns >= 3 && touch_x_last < c_x - 300.0f) {
                                         if (dir_level > 1) { dirUp(); dirUp(); }
@@ -1841,8 +1798,10 @@ skip_touch_processing:
         if (tx >= stop_x && tx < stop_x + stop_w && ty >= stop_y && ty < stop_y + stop_h) {
           powerUnlock();
           ftpvita_fini();
+          refreshFileList();
           setDialogStep(DIALOG_STEP_NONE);
         }
+
       }
     } else if (getDialogStep() == DIALOG_STEP_DELETE_CONFIRM_TOUCH) {
       // Delete confirm touch: Sim/Não buttons
@@ -2124,6 +2083,7 @@ FONT_Y_SPACE) - (MAX_ENTRIES * FONT_Y_SPACE);
     }
 
     drawShellInfo(file_list.path);
+    updateFolderTransition();
 
     int top_bar_render_end = 96;
 
@@ -2146,8 +2106,8 @@ FONT_Y_SPACE) - (MAX_ENTRIES * FONT_Y_SPACE);
       }
     }
 
-    if (vitashell_config.view_mode == 2) {
-      if (grandparent_list.length > 0) {
+    if (vitashell_config.view_mode == 2 || vitashell_config.view_mode == 3) {
+      if (vitashell_config.view_mode == 3 && grandparent_list.length > 0) {
         FileListEntry *gp_entry = grandparent_list.head;
         int p_i = 0; float p_y = START_Y;
         
@@ -2239,18 +2199,19 @@ FONT_Y_SPACE) - (MAX_ENTRIES * FONT_Y_SPACE);
             if (slash) snprintf(curr_folder, 256, "%s", slash + 1);
             int num_columns = 1;
             if (parent_list.length > 0) num_columns = 2;
-            if (grandparent_list.length > 0) num_columns = 3;
+            if (vitashell_config.view_mode == 3 && grandparent_list.length > 0) num_columns = 3;
             
             float ox = (num_columns == 3) ? (SHELL_MARGIN_X + 300.0f) : SHELL_MARGIN_X;
+            float col_w = (vitashell_config.view_mode == 2) ? 455.0f : 290.0f;
             if (strcmp(p_entry->name, curr_folder) == 0) {
-                vita2d_draw_rectangle(ox - 10, p_y + 1.0f, 290.0f, FONT_Y_SPACE - 2.0f, RGBA8(255, 200, 50, 40));
+                vita2d_draw_rectangle(ox - 10, p_y + 1.0f, col_w, FONT_Y_SPACE - 2.0f, RGBA8(255, 200, 50, 40));
                 vita2d_draw_rectangle(ox - 10, p_y + 1.0f, 4, FONT_Y_SPACE - 2.0f, RGBA8(255, 200, 50, 200));
                 p_color = RGBA8(255, 220, 100, 240);
             }
             if (p_icon) vita2d_draw_texture(p_icon, ox, p_y + 10.0f);
             vita2d_enable_clipping();
             float clip_p_h = (p_y + FONT_Y_SPACE > SCREEN_HEIGHT - 60) ? (SCREEN_HEIGHT - 60) : (p_y + FONT_Y_SPACE);
-            vita2d_set_clip_rectangle(ox + 28.0f, p_y, ox + 280.0f, clip_p_h);
+            vita2d_set_clip_rectangle(ox + 28.0f, p_y, ox + col_w - 10.0f, clip_p_h);
             pgf_draw_text(ox + 28.0f, p_y + 4.0f, p_color, p_entry->name);
             vita2d_disable_clipping();
             p_y += FONT_Y_SPACE; p_entry = p_entry->next; p_i++;
@@ -2274,31 +2235,50 @@ FONT_Y_SPACE) - (MAX_ENTRIES * FONT_Y_SPACE);
         
         int num_columns = 1;
         if (parent_list.length > 0) num_columns = 2;
-        if (grandparent_list.length > 0) num_columns = 3;
+        if (vitashell_config.view_mode == 3 && grandparent_list.length > 0) num_columns = 3;
 
         float c_x = SHELL_MARGIN_X;
-        if (num_columns == 2) c_x = SHELL_MARGIN_X + 300.0f;
-        else if (num_columns == 3) c_x = SHELL_MARGIN_X + 600.0f;
+        if (vitashell_config.view_mode == 2) {
+            if (num_columns == 2) c_x = SHELL_MARGIN_X + 465.0f;
+        } else {
+            if (num_columns == 2) c_x = SHELL_MARGIN_X + 300.0f;
+            else if (num_columns == 3) c_x = SHELL_MARGIN_X + 600.0f;
+        }
+        c_x += transition_offset_x;
 
-        float cur_margin_x = (vitashell_config.view_mode == 2) ? c_x : SHELL_MARGIN_X;
-        float list_width = (vitashell_config.view_mode == 2) ? 290.0f : (SCREEN_WIDTH - (SHELL_MARGIN_X * 2) + 18.0f);
+        float cur_margin_x = (vitashell_config.view_mode == 2 || vitashell_config.view_mode == 3) ? c_x : SHELL_MARGIN_X + transition_offset_x;
+        float list_width;
+        if (vitashell_config.view_mode == 2) {
+            list_width = 455.0f;
+        } else if (vitashell_config.view_mode == 3) {
+            list_width = 290.0f;
+        } else {
+            list_width = (SCREEN_WIDTH - (SHELL_MARGIN_X * 2) + 18.0f);
+        }
         
-        float x = (vitashell_config.view_mode == 2) ? c_x + 28.0f : FILE_X;
+        float x = (vitashell_config.view_mode == 2 || vitashell_config.view_mode == 3) ? c_x + 28.0f : FILE_X + transition_offset_x;
         float y = START_Y + (i * FONT_Y_SPACE) - scroll_y;
+        float info_x = INFORMATION_X + transition_offset_x;
+
         
         if (vitashell_config.view_mode == 1) { // Grid View
            int row = i / GRID_COLS;
            int col = i % GRID_COLS;
-           x = GRID_START_X + col * (GRID_CELL_W + GRID_GAP);
+           x = GRID_START_X + col * (GRID_CELL_W + GRID_GAP) + transition_offset_x;
            y = START_Y + (row * GRID_CELL_H) - scroll_y + 8;
         }
+
+#ifndef T_ALPHA
+#define T_ALPHA(col) COLOR_ALPHA(col, (unsigned int)((((col) >> 24) * transition_alpha) / 255))
+#endif
 
         // Subtle row background (alternating)
         if (vitashell_config.view_mode != 1 && (i % 2) == 0) {
           unsigned int list_bg = (vitashell_config.background_anim >= 7) ? 
 COLOR_ALPHA(themeListBg(vitashell_config.theme_preset), 100) : themeListBg(vitashell_config.theme_preset);
-          vita2d_draw_rectangle(cur_margin_x - 10, y, list_width, FONT_Y_SPACE, list_bg);
+          vita2d_draw_rectangle(cur_margin_x - 10, y, list_width, FONT_Y_SPACE, T_ALPHA(list_bg));
         }
+
 
         vita2d_texture *icon = NULL;
         if (file_entry->is_symlink) {
@@ -2357,28 +2337,34 @@ COLOR_ALPHA(themeListBg(vitashell_config.theme_preset), 100) : themeListBg(vitas
         // Selection Bar (accent blue)
         int is_selected = (i == base_pos + rel_pos);
         int is_hovered = (mouse_visible && i == mouse_hover_index && i >= 0 && i < file_list.length);
+        if (is_hovered && (vitashell_config.view_mode == 2 || vitashell_config.view_mode == 3)) {
+          if (mouse_x < cur_margin_x - 10 || mouse_x >= cur_margin_x - 10 + list_width) {
+            is_hovered = 0;
+          }
+        }
         if (is_selected || is_hovered) {
           unsigned int bar_color = is_hovered ? RGBA8(50, 120, 200, 60) : themeSelectionBg(vitashell_config.theme_preset);
           unsigned int edge_color = is_hovered ? RGBA8(80, 180, 255, 160) : themeSelectionLine(vitashell_config.theme_preset);
           if (is_selected) color = themeTextColor(vitashell_config.theme_preset);
           if (vitashell_config.view_mode != 1) {
-              vita2d_draw_rectangle(cur_margin_x - 10, y + 1.0f, list_width + 2.0f, FONT_Y_SPACE - 2.0f, bar_color);
-              vita2d_draw_rectangle(cur_margin_x - 10, y + 1.0f, 3, FONT_Y_SPACE - 2.0f, edge_color);
+              vita2d_draw_rectangle(cur_margin_x - 10, y + 1.0f, list_width + 2.0f, FONT_Y_SPACE - 2.0f, T_ALPHA(bar_color));
+              vita2d_draw_rectangle(cur_margin_x - 10, y + 1.0f, 3, FONT_Y_SPACE - 2.0f, T_ALPHA(edge_color));
           } else {
-              vita2d_draw_rectangle(x - 4, y, GRID_CELL_W, GRID_CELL_H, bar_color);
-              vita2d_draw_rectangle(x - 4, y, 3, GRID_CELL_H, edge_color);
+              vita2d_draw_rectangle(x - 4, y, GRID_CELL_W, GRID_CELL_H, T_ALPHA(bar_color));
+              vita2d_draw_rectangle(x - 4, y, 3, GRID_CELL_H, T_ALPHA(edge_color));
           }
         }
 
         // Draw icon
         if (icon) {
+          unsigned int tint_color = RGBA8(255, 255, 255, transition_alpha);
           if (vitashell_config.view_mode != 1) {
-            vita2d_draw_texture(icon, cur_margin_x, y + 10.0f);
+            vita2d_draw_texture_tint(icon, cur_margin_x, y + 10.0f, tint_color);
           } else {
             float icon_x = x + (GRID_CELL_W - GRID_ICON_SIZE) / 2.0f;
             float icon_y = y + 6;
             float s = (float)GRID_ICON_SIZE / (float)vita2d_texture_get_width(icon);
-            vita2d_draw_texture_scale(icon, icon_x, icon_y, s, s);
+            vita2d_draw_texture_tint_scale(icon, icon_x, icon_y, s, s, tint_color);
           }
         }
 
@@ -2386,31 +2372,34 @@ COLOR_ALPHA(themeListBg(vitashell_config.theme_preset), 100) : themeListBg(vitas
         if (fileListFindEntry(&mark_list, file_entry->name)) {
           if (vitashell_config.view_mode != 1) {
             // Fill row with semi-transparent premium accent color
-            vita2d_draw_rectangle(cur_margin_x - 10, y, list_width, FONT_Y_SPACE, (MARKED_COLOR & 0x00FFFFFF) | 0x1A000000);
+            vita2d_draw_rectangle(cur_margin_x - 10, y, list_width, FONT_Y_SPACE, T_ALPHA((MARKED_COLOR & 0x00FFFFFF) | 0x1A000000));
             // Glowing vertical left-side highlight bar
-            vita2d_draw_rectangle(cur_margin_x - 10, y, 4, FONT_Y_SPACE, (MARKED_COLOR & 0x00FFFFFF) | 0xE0000000);
+            vita2d_draw_rectangle(cur_margin_x - 10, y, 4, FONT_Y_SPACE, T_ALPHA((MARKED_COLOR & 0x00FFFFFF) | 0xE0000000));
           } else {
             // Fill cell with translucid background
-            vita2d_draw_rectangle(x - 4, y, GRID_CELL_W, GRID_CELL_H, (MARKED_COLOR & 0x00FFFFFF) | 0x22000000);
+            vita2d_draw_rectangle(x - 4, y, GRID_CELL_W, GRID_CELL_H, T_ALPHA((MARKED_COLOR & 0x00FFFFFF) | 0x22000000));
             // Glowing full border outline around the cell
             float gx = x - 4;
             float gy = y;
             float gw = GRID_CELL_W;
             float gh = GRID_CELL_H;
             unsigned int border_color = (MARKED_COLOR & 0x00FFFFFF) | 0xC0000000;
-            vita2d_draw_rectangle(gx, gy, gw, 2, border_color); // Top
-            vita2d_draw_rectangle(gx, gy + gh - 2, gw, 2, border_color); // Bottom
-            vita2d_draw_rectangle(gx, gy, 2, gh, border_color); // Left
-            vita2d_draw_rectangle(gx + gw - 2, gy, 2, gh, border_color); // Right
+            vita2d_draw_rectangle(gx, gy, gw, 2, T_ALPHA(border_color)); // Top
+            vita2d_draw_rectangle(gx, gy + gh - 2, gw, 2, T_ALPHA(border_color)); // Bottom
+            vita2d_draw_rectangle(gx, gy, 2, gh, T_ALPHA(border_color)); // Left
+            vita2d_draw_rectangle(gx + gw - 2, gy, 2, gh, T_ALPHA(border_color)); // Right
           }
         }
+
 
         // Draw file name
         if (vitashell_config.view_mode != 1) {
           vita2d_enable_clipping();
-          float max_w = (vitashell_config.view_mode == 2) ? 800.0f : MAX_NAME_WIDTH;
+          float max_w = MAX_NAME_WIDTH;
+          if (vitashell_config.view_mode == 2) max_w = 416.0f;
+          else if (vitashell_config.view_mode == 3) max_w = 251.0f;
           float clip_y = (y < START_Y) ? START_Y : y;
-           float clip_h = (y + FONT_Y_SPACE > SCREEN_HEIGHT - 10) ? (SCREEN_HEIGHT - 10) : (y + FONT_Y_SPACE);
+          float clip_h = (y + FONT_Y_SPACE > SCREEN_HEIGHT - 10) ? (SCREEN_HEIGHT - 10) : (y + FONT_Y_SPACE);
           vita2d_set_clip_rectangle(x + 1.0f, clip_y, x + 1.0f + max_w, clip_h);
         }
 
@@ -2429,7 +2418,9 @@ COLOR_ALPHA(themeListBg(vitashell_config.theme_preset), 100) : themeListBg(vitas
         float draw_y = (vitashell_config.view_mode != 1) ? y + 8.0f : y;
         if (i == base_pos + rel_pos && vitashell_config.view_mode != 1) {
           int width = (int)pgf_text_width(file_name);
-          float max_w = (vitashell_config.view_mode == 2) ? 800.0f : MAX_NAME_WIDTH;
+          float max_w = MAX_NAME_WIDTH;
+          if (vitashell_config.view_mode == 2) max_w = 416.0f;
+          else if (vitashell_config.view_mode == 3) max_w = 251.0f;
           if (width >= max_w) {
             if (scroll_count < 60) {
               scroll_x = draw_x;
@@ -2453,10 +2444,13 @@ COLOR_ALPHA(themeListBg(vitashell_config.theme_preset), 100) : themeListBg(vitas
             }
         }
 
-        pgf_draw_text(draw_x + 1.0f, draw_y + 1.0f, COLOR_ALPHA(themeTextColor(vitashell_config.theme_preset), 140), file_name);
-        pgf_draw_text(draw_x, draw_y, color, file_name);
+        pgf_draw_text(draw_x + 1.0f, draw_y + 1.0f, T_ALPHA(COLOR_ALPHA(themeTextColor(vitashell_config.theme_preset), 140)), file_name);
+        pgf_draw_text(draw_x, draw_y, T_ALPHA(color), file_name);
 
         if (vitashell_config.view_mode != 1) vita2d_disable_clipping();
+
+        // Redefine color with transition alpha for subsequent info drawing
+        color = T_ALPHA(color);
 
         // File information
         if (strcmp(file_entry->name, DIR_UP) != 0 && vitashell_config.view_mode == 0) {
@@ -2464,7 +2458,7 @@ COLOR_ALPHA(themeListBg(vitashell_config.theme_preset), 100) : themeListBg(vitas
           if (draw_y_info + 20 < SCREEN_HEIGHT - STATUSBAR_H) {
           if (dir_level == 0) {
             char used_size_string[16], max_size_string[16];
-            int max_size_x = ALIGN_RIGHT(INFORMATION_X, pgf_text_width("0000.00 MB"));
+            int max_size_x = ALIGN_RIGHT(info_x, pgf_text_width("0000.00 MB"));
             int separator_x = ALIGN_RIGHT(max_size_x, pgf_text_width("  /  "));
             if (file_entry->size != 0 && file_entry->size2 != 0) {
               getSizeString(used_size_string, file_entry->size2 - file_entry->size);
@@ -2474,7 +2468,7 @@ COLOR_ALPHA(themeListBg(vitashell_config.theme_preset), 100) : themeListBg(vitas
               strcpy(max_size_string, "-");
             }
             
-            float x = ALIGN_RIGHT(INFORMATION_X, pgf_text_width(max_size_string));
+            float x = ALIGN_RIGHT(info_x, pgf_text_width(max_size_string));
             pgf_draw_text(x, draw_y_info, color, max_size_string);
             pgf_draw_text(separator_x, draw_y_info, color, "  /");
             x = ALIGN_RIGHT(separator_x, pgf_text_width(used_size_string));
@@ -2489,7 +2483,7 @@ COLOR_ALPHA(themeListBg(vitashell_config.theme_preset), 100) : themeListBg(vitas
             } else {
               str = language_container[FOLDER];
             }
-            pgf_draw_text(ALIGN_RIGHT(INFORMATION_X, pgf_text_width(str)), draw_y_info, color, str);
+            pgf_draw_text(ALIGN_RIGHT(info_x, pgf_text_width(str)), draw_y_info, color, str);
           }
 
           // Date
@@ -2502,10 +2496,11 @@ COLOR_ALPHA(themeListBg(vitashell_config.theme_preset), 100) : themeListBg(vitas
           char string[64];
           sprintf(string, "%s %s", date_string, time_string);
 
-          float x = ALIGN_RIGHT(SCREEN_WIDTH - SHELL_MARGIN_X, pgf_text_width(string));
+          float x = ALIGN_RIGHT(SCREEN_WIDTH - SHELL_MARGIN_X + transition_offset_x, pgf_text_width(string));
           pgf_draw_text(x, draw_y_info, color, string);
           }
         }
+
 
         // Next
         file_entry = file_entry->next;
@@ -2575,7 +2570,6 @@ COLOR_ALPHA(themeListBg(vitashell_config.theme_preset), 100) : themeListBg(vitas
       vita2d_draw_texture_scale(mouse_tex, mouse_x, mouse_y, ms, ms);
     }
 
-    drawFolderTransition();
 
     // End drawing
     endDrawing();

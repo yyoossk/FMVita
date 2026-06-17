@@ -2,11 +2,17 @@
   <img src="https://github.com/WolffsRoom/FMVita/blob/master/media/Media/%C3%8Dcones%20-%20Branco.svg" width="128" alt="Logo FMVita">
   <h1>FMVita</h1>
   <h3>File Manager Vita</h3>
+  <p>
+    <img src="https://img.shields.io/badge/version-0.5.0-blue?style=flat-square" alt="Version">
+    <img src="https://img.shields.io/badge/platform-PS%20Vita-blueviolet?style=flat-square" alt="Platform">
+    <img src="https://img.shields.io/badge/license-GPLv3-green?style=flat-square" alt="License">
+  </p>
   <p align="center">
     <a href="#installation">Installation</a> •
     <a href="#key-differences-and-new-features">Features</a> •
     <a href="#directory-structure-changes">Directories</a> •
-    <a href="#technical-details-and-build">Build</a>
+    <a href="#technical-details-and-build">Build</a> •
+    <a href="#changelog">Changelog</a>
   </p>
 </div>
 
@@ -37,8 +43,9 @@ FMVita was designed to prevent conflicts with your current configuration. Theref
   <img src="https://github.com/WolffsRoom/FMVita/blob/master/media/Media/FMVita_Image/2026-05-23-003456-739293.png" alt="Grid Mode" width="80%">
 </div>
 
-* **Six Color Presets:** *Dark, Light, Blue, Red, Purple*, and *Brown*. The system automatically calculates text, highlight, selection, dialog, and border colors.
-* **Quick Action Toolbar:** A new toolbar featuring 8 quick shortcuts: *Copy, Paste, Delete, Rename, Filter, Group, Search*, and *New*.
+* **Eight Color Presets:** *Dark, Light, Blue, Red, Purple, Brown, Gray*, and *Custom*. The system automatically calculates text, highlight, selection, dialog, and border colors.
+* **Custom Theme Support:** Select the *Custom* preset and edit `ux0:FMVita/colors.txt` to fully define every color in the interface.
+* **Quick Action Toolbar:** A new toolbar featuring 9 quick shortcuts: *Move, Copy, Paste, Delete, Rename, Filter, Group, Search*, and *New*.
 * **Transparency:** The interface elements (topbar, cards, and buttons) feature a reduced alpha channel when using image backgrounds (GIF or PNG) for better visibility.
 * **Themed Scrollbar:** An adaptive scrollbar that matches the theme's highlight color.
 * **Redesigned Address Bar:** Now displays the current directory path, battery status, and clock.
@@ -47,8 +54,8 @@ FMVita was designed to prevent conflicts with your current configuration. Theref
 ### Animated Backgrounds
 
 * **Four Procedural Animations:** *Particles* (floating PlayStation icons), *Waves* (colored mist), *Stars* (starfield), and *Squares* (PS2-styled falling rectangles).
-* **Animated GIF Support:** Loads from `ux0:FMVita/Gif/theme.gif` (Mode 4) with multiple fallbacks. Powered by an `stb_image` engine featuring frame delay control, cover-fit scaling, and clipping.
-* **Static PNG Support:** Native loading from `ux0:FMVita/Background/bg.png` (Mode 5).
+* **Animated GIF Support:** Loads from `ux0:FMVita/Gif/theme.gif` (Mode 4) with multiple fallbacks. Powered by an `stb_image` engine featuring frame delay control, cover-fit scaling, and clipping. Requires 960×540, 8-bit color.
+* **Static PNG Support:** Native loading from `ux0:FMVita/Background/bg.png` (Mode 5). Requires 960×540, 8-bit color.
 
 ### Touchscreen Support
 
@@ -69,11 +76,32 @@ FMVita was designed to prevent conflicts with your current configuration. Theref
   <img src="https://github.com/WolffsRoom/FMVita/blob/master/media/Media/FMVita_Image/2026-05-23-003541-050146.png" alt="Column Mode 2" width="49%">
 </div>
 
-* **Column View:** An innovative 3-column layout (*Grandparent / Parent / Current*) for ultra-fast directory browsing. Highlights the active folder in gold within the upper columns and allows direct touch navigation on any column.
+* **View Modes:** Four layout options available under Settings → View Mode:
+  * **List** — Traditional single-column list view.
+  * **Grid** — Icon-based tile grid view.
+  * **2 Columns** — Split-screen view showing Parent and Current folders side-by-side, each occupying exactly **50% of the screen width**.
+  * **3 Columns** — Three-panel view (*Grandparent / Parent / Current*) for ultra-fast directory browsing.
+* **Column View Touch Navigation:** Highlights the active folder in gold within the upper columns and allows direct touch navigation on any column.
+* **Page Speed:** Configurable scroll repeat speed in Settings → Page Speed, applies to both D-PAD and analog stick navigation.
 * **Bookmarks and Recents:** The `Square` shortcut jumps directly to your bookmarks; the `Triangle` shortcut navigates to recent files (which automatically generate `.lnk` symlinks).
 * **Search Tools:** A Filter system (All/Folders/Files) on the toolbar and case-insensitive Search within the current directory.
 * **Enhanced Scrolling:** Infinite scroll wrapping (from top to bottom and vice versa) and smooth lerp-based scrolling with acceleration.
+* **Transition Animations:** Configurable Slide, Smooth Slide, or Fade transitions when navigating between folders. Can be disabled.
 * **Symlinks:** Optimized tracking via a `SymlinkDirectoryPath` linked list to ensure correct navigation through shortcuts.
+
+### VPK Management
+
+* **Batch VPK Installation:** Mark multiple VPK files and install them all sequentially in one go — no need to install one at a time.
+* **Background VPK Installation:** VPK installation runs from the file browser, no longer dependent on PKGj.
+* **Post-Install Launch:** Optionally launch the just-installed application directly after installation.
+* **QR Code Download & Auto-Install:** Scan a QR code containing a VPK URL to download and auto-install directly.
+
+### FTP Server
+
+* **Wi-Fi Auto-Check:** If Wi-Fi is off, FMVita will prompt you to enable it before starting the FTP server — no more silent failures.
+* **Improved Status Messages:** FTP operations now display human-readable progress descriptions and current activity (upload, download, rename, etc.).
+* **Progress Tracking:** File transfer operations show 0–100% progress in the FTP status modal.
+* **Auto-Refresh on Close:** The current folder is automatically refreshed when the FTP server is stopped.
 
 ### Undo System
 
@@ -90,7 +118,8 @@ FMVita was designed to prevent conflicts with your current configuration. Theref
 
 * **System Protection:** Renaming locks on critical system folders (verified via `isProtectedPath()`) with custom error messages.
 * **Independent Settings:** Reads and writes directly to `ux0:FMVita/settings.txt` (`use_custom_config = 1` by default; can be temporarily disabled by holding `L` during boot).
-* **New Menu Options:** *USB Device* (4 modes), *SELECT Button* (USB/FTP), *View Mode* (List/Grid/Column), *Background Anim* (6 modes), and *Theme Preset* (6 colors).
+* **Language Switching:** Change the interface language without rebooting the console — FMVita restarts itself to apply the change instantly.
+* **New Menu Options:** *USB Device* (4 modes), *SELECT Button* (USB/FTP/QR), *View Mode* (List/Grid/2 Columns/3 Columns), *Background Anim* (7 modes), *Theme Preset* (8 options), *Page Speed*, *Transition Mode*, and *Scroll Loop*.
 
 ---
 
@@ -118,6 +147,7 @@ FMVita completely isolates its data from the original VitaShell:
 | `ux0:app/VITASHELL/module/*` | `ux0:FMVita/module/*` |
 | *(Did not exist)* | `ux0:FMVita/Gif/theme.gif` |
 | *(Did not exist)* | `ux0:FMVita/Background/bg.png` |
+| *(Did not exist)* | `ux0:FMVita/colors.txt` |
 
 ---
 
@@ -126,8 +156,8 @@ FMVita completely isolates its data from the original VitaShell:
 ### Source Code Modifications
 * **New Modules:** `modules/kernel/` (loads its own `umass.skprx`), `modules/patch/`, `modules/user/`, and the `usbdevice/` driver.
 * **New Files:** Implemented `buttons.c/.h` for PlayStation button rendering, `main_context.c` for reorganized context submenus, and a GIF decoding engine using `stb_image.h`.
-* **Localization (`english_us.txt`):** Over 27 new entries integrated and copied to the native directory upon first launch.
-* **Internal Refactoring:** Added over 30 inline theme color functions in `main.h`, restructured `browser.c` (fixing D-PAD scroll issues, column view, touch engine), and cleaned up legacy options in `settings.c`.
+* **Localization (`english_us.txt`):** Over 40 new entries integrated and copied to the native directory upon first launch. Language switch now restarts only FileManager, not the console.
+* **Internal Refactoring:** Added over 30 inline theme color functions in `main.h`, restructured `browser.c` (fixing D-PAD scroll issues, column views with proper 50/50 split, touch engine), and cleaned up legacy options in `settings.c`.
 
 ### Build Instructions
 Requires [vitasdk](https://github.com/vitasdk) and the standard toolchains properly installed and configured.
@@ -138,6 +168,52 @@ cd build
 cmake ..
 make
 ```
+
+Or use the provided script:
+
+```bash
+export VITASDK=/usr/local/vitasdk
+./build.sh
+```
+
+---
+
+## Changelog
+
+### v0.5.0 — 2026-06-17
+* **2 Columns view — 50/50 split:** The two-column layout now divides the screen evenly (each column gets exactly 50% width), eliminating empty space on the right.
+* **Improved text clipping in column modes:** Filename display boundaries are now dynamic — text is correctly clipped and scrolled within each column without spilling over.
+* **Grandparent panel restricted to 3 Columns:** The grandparent folder panel is no longer drawn in 2 Columns mode, keeping the layout clean.
+* **Better mouse hover in column modes:** Hover highlights are now correctly bounded to the active column area only.
+* **Language switch restarts FileManager (not console):** Changing the language in Settings now triggers a FileManager restart instead of a full console reboot.
+* **Custom theme preset:** Added a "Custom" theme option that reads colors from `ux0:FMVita/colors.txt`.
+* **Batch VPK installation:** Mark multiple VPKs and install them all in sequence.
+* **FTP Wi-Fi check modal:** FTP now warns if Wi-Fi is disabled before starting.
+* **FTP status improvements:** More readable transfer descriptions and 0–100% progress tracking.
+* **Auto-refresh on FTP close:** Current folder refreshes automatically after FTP is stopped.
+* **Background image validation:** PNG/GIF backgrounds are now validated for 960×540 resolution and 8-bit color depth.
+* **Page Speed via D-PAD and Analog stick:** Configurable scroll repeat rate now applies to both input methods.
+* **Transition animation fixes:** Slide and Fade transitions overhauled to avoid visual bugs.
+
+### v0.4.5
+* View Mode with 3 Columns panel layout (Grandparent / Parent / Current).
+* Grid view with icon tiles.
+* Transition animations (Slide, Smooth Slide, Fade).
+* Page speed setting for scroll rate.
+* Scroll Loop toggle (wrap from top to bottom).
+* Enhanced toolbar with 8 quick actions.
+* Undo system for Move and Copy.
+* Drag-and-drop file management with auto-scroll.
+
+### v0.4.3
+* QR code download and auto-install.
+* Touch-friendly confirmation dialogs (no system dialogs).
+* Post-install app launch.
+* VPK context menu integration.
+* Video player improvements.
+* PlayStation button texture rendering.
+
+---
 
 ## Credits
 * **TheFloW** — Creator of the original VitaShell.
@@ -150,5 +226,5 @@ make
 
 ## AI Notice
 Artificial Intelligence tools were utilized as a support resource during the development of this project:
-* **Gemini and DeepSeek:** Assisted in bug fixing, logical troubleshooting, and C/C++ code optimization.
+* **Gemini (Google DeepMind):** Assisted in bug fixing, logical troubleshooting, C code optimization, and feature implementation throughout all phases.
 * **Claude:** Used for brainstorming, project structuring, and prototyping new features.

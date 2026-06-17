@@ -1258,10 +1258,19 @@ int contextMenuMoreEnterCallback(int sel, void *context) {
       // Empty install list
       fileListEmpty(&install_list);
 
-      FileListEntry *file_entry = file_list.head->next; // Ignore '..'
+      FileListEntry *file_entry = NULL;
+      int count = 0;
+
+      if (mark_list.length > 0) {
+        file_entry = mark_list.head;
+        count = mark_list.length;
+      } else {
+        file_entry = file_list.head->next; // Ignore '..'
+        count = file_list.length - 1;
+      }
 
       int i;
-      for (i = 0; i < file_list.length - 1; i++) {
+      for (i = 0; i < count && file_entry; i++) {
         char path[MAX_PATH_LENGTH];
         snprintf(path, MAX_PATH_LENGTH, "%s%s", file_list.path, file_entry->name);
 
@@ -1280,6 +1289,7 @@ int contextMenuMoreEnterCallback(int sel, void *context) {
 
       break;
     }
+
 
     case MENU_MORE_ENTRY_INSTALL_FOLDER:
     {

@@ -44,8 +44,8 @@ static char *usbdevice_options[4];
 static char *select_button_options[3];
 static char *bg_anim_options[9];
 static char *transition_mode_options[4];
-static char *view_mode_options[3];
-static char *theme_preset_options[7];
+static char *view_mode_options[4];
+static char *theme_preset_options[8];
 
 static char *language_options[20];
 
@@ -224,7 +224,8 @@ static void refreshSettingsLangStrings() {
 
   view_mode_options[0] = language_container[VIEW_MODE_LIST];
   view_mode_options[1] = language_container[VIEW_MODE_GRID];
-  view_mode_options[2] = language_container[VIEW_MODE_COLUMN];
+  view_mode_options[2] = language_container[VIEW_MODE_2COLUMN];
+  view_mode_options[3] = language_container[VIEW_MODE_3COLUMN];
 
   theme_preset_options[0] = language_container[THEME_DARK];
   theme_preset_options[1] = language_container[THEME_LIGHT];
@@ -233,6 +234,8 @@ static void refreshSettingsLangStrings() {
   theme_preset_options[4] = language_container[THEME_PURPLE];
   theme_preset_options[5] = language_container[THEME_BROWN];
   theme_preset_options[6] = language_container[THEME_GRAY];
+  theme_preset_options[7] = language_container[THEME_CUSTOM];
+
 }
 
 void openSettingsMenu() {
@@ -632,7 +635,7 @@ void settingsMenuCtrl() {
   if (pressed_pad[PAD_START] || pressed_pad[PAD_CANCEL]) {
     if (language_changed) {
       closeSettingsMenu();
-      setTouchConfirm(language_container[CONFIRM_REBOOT], rebootDevice, NULL);
+      setTouchConfirm(language_container[CONFIRM_RESTART], restartShell, NULL);
       return;
     }
     closeSettingsMenu();

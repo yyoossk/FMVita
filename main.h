@@ -55,7 +55,7 @@ void drawShellInfo(const char *path);
 #define INCLUDE_EXTERN_RESOURCE(name) extern unsigned char _binary_resources_##name##_start; extern unsigned char _binary_resources_##name##_size; \
 
 // VitaShell version major.minor
-#define VITASHELL_VERSION_MAJOR 0x02
+#define VITASHELL_VERSION_MAJOR 0x05
 #define VITASHELL_VERSION_MINOR 0x00
 
 #define VITASHELL_VERSION ((VITASHELL_VERSION_MAJOR << 0x18) | (VITASHELL_VERSION_MINOR << 0x10))
@@ -336,8 +336,29 @@ void drawFtpTouchDialog();
 #define THEME_PRESET_PURPLE 4
 #define THEME_PRESET_BROWN  5
 #define THEME_PRESET_GRAY   6
+#define THEME_PRESET_CUSTOM 7
+
+extern int BACKGROUND_COLOR;
+extern int TITLE_COLOR;
+extern int PATH_COLOR;
+extern int DATE_TIME_COLOR;
+extern int FOCUS_COLOR;
+extern int FILE_COLOR;
+extern int FILE_SYMLINK_COLOR;
+extern int FOLDER_SYMLINK_COLOR;
+extern int SFO_COLOR;
+extern int TXT_COLOR;
+extern int FOLDER_COLOR;
+extern int IMAGE_COLOR;
+extern int ARCHIVE_COLOR;
+extern int SCROLL_BAR_COLOR;
+extern int SCROLL_BAR_BG_COLOR;
+extern int MARKED_COLOR;
+extern int DIALOG_COLOR;
+extern int DIALOG_BG_COLOR;
 
 static inline unsigned int themeTopbarBg(int preset) {
+  if (preset == THEME_PRESET_CUSTOM) return COLOR_ALPHA(BACKGROUND_COLOR, 245);
   switch (preset) {
     case THEME_PRESET_LIGHT: return RGBA8(245, 243, 238, 245);
     case THEME_PRESET_BLUE:  return RGBA8(8, 22, 55, 245);
@@ -349,6 +370,7 @@ static inline unsigned int themeTopbarBg(int preset) {
   }
 }
 static inline unsigned int themeTopbarText(int preset) {
+  if (preset == THEME_PRESET_CUSTOM) return TITLE_COLOR;
   switch (preset) {
     case THEME_PRESET_LIGHT: return RGBA8(25, 30, 45, 255);
     case THEME_PRESET_GRAY:  return RGBA8(220, 220, 220, 255);
@@ -356,6 +378,7 @@ static inline unsigned int themeTopbarText(int preset) {
   }
 }
 static inline unsigned int themeBgColor(int preset) {
+  if (preset == THEME_PRESET_CUSTOM) return BACKGROUND_COLOR;
   switch (preset) {
     case THEME_PRESET_LIGHT: return RGBA8(220, 222, 225, 255);
     case THEME_PRESET_BLUE:  return RGBA8(6, 14, 30, 255);
@@ -367,6 +390,7 @@ static inline unsigned int themeBgColor(int preset) {
   }
 }
 static inline unsigned int themeListBg(int preset) {
+  if (preset == THEME_PRESET_CUSTOM) return BACKGROUND_COLOR;
   switch (preset) {
     case THEME_PRESET_LIGHT: return RGBA8(205, 207, 212, 255);
     case THEME_PRESET_BLUE:  return RGBA8(10, 18, 38, 255);
@@ -378,6 +402,7 @@ static inline unsigned int themeListBg(int preset) {
   }
 }
 static inline unsigned int themeCardBg(int preset) {
+  if (preset == THEME_PRESET_CUSTOM) return COLOR_ALPHA(BACKGROUND_COLOR, 220);
   switch (preset) {
     case THEME_PRESET_LIGHT: return RGBA8(230, 228, 222, 220);
     case THEME_PRESET_BLUE:  return RGBA8(10, 20, 44, 220);
@@ -389,6 +414,7 @@ static inline unsigned int themeCardBg(int preset) {
   }
 }
 static inline unsigned int themeButtonDefault(int preset) {
+  if (preset == THEME_PRESET_CUSTOM) return FOCUS_COLOR;
   switch (preset) {
     case THEME_PRESET_LIGHT: return RGBA8(160, 165, 175, 220);
     case THEME_PRESET_GRAY:  return RGBA8(80, 80, 80, 220);
@@ -396,6 +422,7 @@ static inline unsigned int themeButtonDefault(int preset) {
   }
 }
 static inline unsigned int themeButtonAccent(int preset) {
+  if (preset == THEME_PRESET_CUSTOM) return FOCUS_COLOR;
   switch (preset) {
     case THEME_PRESET_LIGHT: return RGBA8(42, 88, 175, 220);
     case THEME_PRESET_RED:   return RGBA8(210, 48, 48, 220);
@@ -406,6 +433,7 @@ static inline unsigned int themeButtonAccent(int preset) {
   }
 }
 static inline unsigned int themeButtonSuccess(int preset) {
+  if (preset == THEME_PRESET_CUSTOM) return RGBA8(45, 175, 105, 220);
   switch (preset) {
     case THEME_PRESET_LIGHT: return RGBA8(55, 155, 95, 220);
     case THEME_PRESET_GRAY:  return RGBA8(100, 150, 100, 220);
@@ -413,6 +441,7 @@ static inline unsigned int themeButtonSuccess(int preset) {
   }
 }
 static inline unsigned int themeButtonDanger(int preset) {
+  if (preset == THEME_PRESET_CUSTOM) return RGBA8(210, 65, 65, 220);
   switch (preset) {
     case THEME_PRESET_LIGHT: return RGBA8(195, 55, 55, 220);
     case THEME_PRESET_GRAY:  return RGBA8(150, 80, 80, 220);
@@ -420,6 +449,7 @@ static inline unsigned int themeButtonDanger(int preset) {
   }
 }
 static inline unsigned int themeTextColor(int preset) {
+  if (preset == THEME_PRESET_CUSTOM) return FILE_COLOR;
   switch (preset) {
     case THEME_PRESET_LIGHT: return RGBA8(25, 30, 45, 255);
     case THEME_PRESET_GRAY:  return RGBA8(210, 210, 210, 255);
@@ -427,6 +457,7 @@ static inline unsigned int themeTextColor(int preset) {
   }
 }
 static inline unsigned int themeTextDim(int preset) {
+  if (preset == THEME_PRESET_CUSTOM) return SFO_COLOR;
   switch (preset) {
     case THEME_PRESET_LIGHT: return RGBA8(80, 85, 100, 255);
     case THEME_PRESET_GRAY:  return RGBA8(140, 140, 140, 255);
@@ -434,6 +465,7 @@ static inline unsigned int themeTextDim(int preset) {
   }
 }
 static inline unsigned int themeFolderColor(int preset) {
+  if (preset == THEME_PRESET_CUSTOM) return FOLDER_COLOR;
   switch (preset) {
     case THEME_PRESET_LIGHT: return RGBA8(42, 88, 175, 255);
     case THEME_PRESET_BLUE:  return RGBA8(60, 180, 240, 255);
@@ -445,6 +477,7 @@ static inline unsigned int themeFolderColor(int preset) {
   }
 }
 static inline unsigned int themeAccentColor(int preset) {
+  if (preset == THEME_PRESET_CUSTOM) return FOCUS_COLOR;
   switch (preset) {
     case THEME_PRESET_LIGHT: return RGBA8(42, 88, 175, 255);
     case THEME_PRESET_BLUE:  return RGBA8(60, 150, 255, 255);
@@ -456,6 +489,7 @@ static inline unsigned int themeAccentColor(int preset) {
   }
 }
 static inline unsigned int themeDialogBg(int preset) {
+  if (preset == THEME_PRESET_CUSTOM) return DIALOG_BG_COLOR;
   switch (preset) {
     case THEME_PRESET_LIGHT: return RGBA8(230, 228, 222, 250);
     case THEME_PRESET_GRAY:  return RGBA8(35, 35, 35, 248);
@@ -463,6 +497,7 @@ static inline unsigned int themeDialogBg(int preset) {
   }
 }
 static inline unsigned int themeSelectionBg(int preset) {
+  if (preset == THEME_PRESET_CUSTOM) return COLOR_ALPHA(FOCUS_COLOR, 60);
   switch (preset) {
     case THEME_PRESET_LIGHT: return RGBA8(42, 88, 175, 40);
     case THEME_PRESET_GRAY:  return RGBA8(100, 100, 100, 60);
@@ -470,12 +505,14 @@ static inline unsigned int themeSelectionBg(int preset) {
   }
 }
 static inline unsigned int themeSelectionLine(int preset) {
+  if (preset == THEME_PRESET_CUSTOM) return COLOR_ALPHA(FOCUS_COLOR, 180);
   switch (preset) {
     case THEME_PRESET_LIGHT: return RGBA8(42, 88, 175, 180);
     case THEME_PRESET_GRAY:  return RGBA8(150, 150, 150, 180);
     default:                 return RGBA8(60, 150, 255, 180);
   }
 }
+
 
 // Install error diagnostic
 extern int install_error_step;
